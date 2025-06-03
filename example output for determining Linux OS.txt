@@ -54,3 +54,43 @@ debconf.conf    debian_version  debuginfod/
 tangent@frog:~$ cat /etc/*_version
 
 trixie/sid
+
+---
+
+From Stack Overflow: https://stackoverflow.com/questions/26988262/best-way-to-find-the-os-name-and-version-on-a-unix-linux-platform
+
+This work fine for all Linux environments.
+
+#!/bin/sh
+cat /etc/*-release
+
+In Ubuntu:
+
+$ cat /etc/*-release
+
+DISTRIB_ID=Ubuntu
+DISTRIB_RELEASE=10.04
+DISTRIB_CODENAME=lucid
+DISTRIB_DESCRIPTION="Ubuntu 10.04.4 LTS"
+
+Or Ubuntu 12.04 (Precise Pangolin):
+
+$ cat /etc/*-release
+
+DISTRIB_ID=Ubuntu
+DISTRIB_RELEASE=12.04
+DISTRIB_CODENAME=precise
+DISTRIB_DESCRIPTION="Ubuntu 12.04.4 LTS"
+NAME="Ubuntu"
+VERSION="12.04.4 LTS, Precise Pangolin"
+ID=ubuntu
+ID_LIKE=debian
+PRETTY_NAME="Ubuntu precise (12.04.4 LTS)"
+VERSION_ID="12.04"
+
+In RHEL:
+
+$ cat /etc/*-release
+
+Red Hat Enterprise Linux Server release 6.5 (Santiago)
+Red Hat Enterprise Linux Server release 6.5 (Santiago)
