@@ -1,0 +1,56 @@
+tangent@frog:~$ lsb_release -a
+
+No LSB modules are available.
+Distributor ID:	Linuxmint
+Description:	Linux Mint 22.1
+Release:	22.1
+Codename:	xia
+
+tangent@frog:~$ uname -r
+
+6.8.0-60-generic
+tangent@frog:~$ cat /etc/os-release
+NAME="Linux Mint"
+VERSION="22.1 (Xia)"
+ID=linuxmint
+ID_LIKE="ubuntu debian"
+PRETTY_NAME="Linux Mint 22.1"
+VERSION_ID="22.1"
+HOME_URL="https://www.linuxmint.com/"
+SUPPORT_URL="https://forums.linuxmint.com/"
+BUG_REPORT_URL="http://linuxmint-troubleshooting-guide.readthedocs.io/en/latest/"
+PRIVACY_POLICY_URL="https://www.linuxmint.com/"
+VERSION_CODENAME=xia
+UBUNTU_CODENAME=noble
+
+tangent@frog:~$ hostnamectl
+
+ Static hostname: frog
+       Icon name: computer-desktop
+         Chassis: desktop 🖥️
+      Machine ID: 56ed414d534d4c48b0d040afaded7857
+         Boot ID: 644d33bdba184ef789060196813ecd60
+Operating System: Linux Mint 22.1
+          Kernel: Linux 6.8.0-60-generic
+    Architecture: x86-64
+ Hardware Vendor: ASRock
+  Hardware Model: 970DE3/U3S3
+Firmware Version: P1.60
+   Firmware Date: Fri 2012-10-05
+    Firmware Age: 12y 7month 4w
+
+tangent@frog:~$ cat /proc/version
+
+Linux version 6.8.0-60-generic (buildd@lcy02-amd64-054) (x86_64-linux-gnu-gcc-13 (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0, GNU ld (GNU Binutils for Ubuntu) 2.42) #63-Ubuntu SMP PREEMPT_DYNAMIC Tue Apr 15 19:04:15 UTC 2025
+
+tangent@frog:~$ cat /etc/issue
+
+Linux Mint 22.1 Xia \n \l
+
+tangent@frog:~$ cat /etc/deb
+
+debconf.conf    debian_version  debuginfod/
+
+tangent@frog:~$ cat /etc/*_version
+
+trixie/sid
