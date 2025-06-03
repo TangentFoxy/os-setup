@@ -1,0 +1,5 @@
+# os-setup
+Scripts to make setting up a new system easier.. hopefully.
+
+Download this repo by cloning it to get started:
+ `sudo apt-get update && sudo apt-get install git -y && git clone URL_GOES_HERE --depth=1 && cd os-setup && ./run.sh`
