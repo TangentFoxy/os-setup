@@ -14,11 +14,6 @@
 -- end
 -- print("It was '" .. password .. "'")
 
-local function prompt(text)
-  io.write(text)
-  return io.read("*line")
-end
-
 local commands = {
   "sudo apt-get update",
   "sudo apt-get upgrade -y",
@@ -54,7 +49,10 @@ local packages = {
     ]],
     notes = "Need to figure out how to make sure this gets in the menu.",
   },
-  docker = { apt = "docker.io", execute = "sudo usermod -aG docker $USER", },
+  docker = {
+    description = "Docker (containers!)",
+    apt = "docker.io", execute = "sudo usermod -aG docker $USER",
+  },
   ["docker-compose-legacy"] = {
     description = "docker-compose (Python script, legacy)",
     prerequisites = {"docker"},
@@ -75,7 +73,7 @@ local packages = {
       sudo apt-get install librewolf -y
     ]],
     notes = "Need to find out why extrepo disabled librewolf on my system and whether or not this needs fixing.",
-    next = "purge-firefox",
+    next = "purge-firefox", -- TODO this was an attempt at ordering for an optional prerequisite
   },
   luarocks = {
     description = "Luarocks (Lua package manager)",
@@ -94,7 +92,7 @@ local packages = {
     description = "Obsidian (notetaking/productivity tool)",
     browse_to = "https://obsidian.md/download",
     execute = [[
-      cd Downloads
+      cd ~/Downloads
       sudo dpkg -i obsidian*.deb
       sudo apt-get install -f
       rm obsidian*.deb
@@ -104,7 +102,7 @@ local packages = {
     description = "MPV (media player)",
     prerequisites = "brew",
     execute = [[
-      ulimit -n 10000
+      ulimit -n 10000   # brew devs refuse to fix this https://github.com/Homebrew/brew/issues/9120
       brew install mpv
       # sudo curl --output-dir /etc/apt/trusted.gpg.d -O https://apt.fruit.je/fruit.gpg
       # sudo sh -c 'echo "deb http://apt.fruit.je/debian trixie mpv" > /etc/apt/sources.list.d/fruit.list'
@@ -116,12 +114,12 @@ local packages = {
     description = "Private Internet Access (cheap, secure VPN)",
     browse_to = "https://www.privateinternetaccess.com/download/linux-vpn",
     execute = [[
-      cd Downloads
+      cd ~/Downloads
       sudo chmod +x ./pia*.run
       ./pia*.run
       rm ./pia*.run
     ]],
-    delay = true,
+    delay = true, -- TODO this was an attempt to make some actions go last so that GUIs don't interfere
   },
   telegram = {
     description = "Telegram Desktop (messenger)",
@@ -160,7 +158,7 @@ local packages = {
     description = "Pulsar (code editor, fork of Atom)",
     browse_to = "https://pulsar-edit.dev/download.html#regular-releases",
     execute = [[
-      cd Downloads
+      cd ~/Downloads
       sudo dpkg -i Linux.pulsar*.deb
       sudo apt-get install -f
       rm Linux.pulsar*.deb
@@ -178,26 +176,26 @@ local packages = {
   },
   ollama = { description = "Ollama (CLI tool for running local models)", execute = "curl -fsSL https://ollama.com/install.sh | sh", ask = false, },
   ["git-credentials-insecure"] = {
-    prompt = "Configure Git to store credentials in plaintext (this is a bad and insecure idea!)?",
+    prompt = "Configure Git to store credentials in plaintext\n  (this is a bad and insecure idea!)?",
     prerequisites = "git",
     execute = "git config --global credential.helper store",
     ignore = true,
   },
   ["git-credentials-libsecret"] = {
     prompt = "Configure Git to store credentials securely (using libsecret)?",
-    prerequisites = {"git", "import-private-config"},
+    prerequisites = {"git", "import-private-config"}, -- NOTE the second prerequisite here should be optional
     execute = [[
       sudo apt install libsecret-1-0 libsecret-1-dev libglib2.0-dev
       sudo make --directory=/usr/share/doc/git/contrib/credential/libsecret
       git config --global credential.helper /usr/share/doc/git/contrib/credential/libsecret/git-credential-libsecret
     ]],
-    notes = "The prerequisite of import-private-config is a soft prerequisite.. but I haven't made a way to distinguish that yet.",
   },
   ["import-private-config"] = {
     prompt = "Would you like to run a private config import script?",
     execute = [[
-      read -p "Press enter after a private config import script was saved to Downloads/import-private-config.lua (or after you have run it)." dummy
-      cd Downloads
+      echo "Press enter after a private config import script was saved to"
+      read -p "  ~/Downloads/import-private-config.lua (or after you have run it)." dummy
+      cd ~/Downloads
       chmod +x ./import-private-config.lua
       ./import-private-config.lua
       # git config --global init.defaultBranch main   # I shouldn't need this soon hopefully..
@@ -227,9 +225,9 @@ local packages = {
     ]],
   },
   ["1password"] = {
-    description = "1password (password manager & security key)",
+    description = "1password (password manager & passkey)",
     execute = [[
-      cd Downloads
+      cd ~/Downloads
       curl -O https://downloads.1password.com/linux/debian/amd64/stable/1password-latest.deb
       sudo dpkg -i 1password-latest.deb
       sudo apt-get install -f
@@ -237,3 +235,140 @@ local packages = {
     ]],
   },
 }
+
+local function prompt(text)
+  io.write(text)
+  return io.read("*line")
+end
+
+local function ask(text)
+  local choice = prompt(text)
+  if choice:sub(1):lower() == "y" then
+    return true
+  end
+end
+
+-- 1. go through all packages asking for options
+--     ignore things with ignore = true, don't ask about things with ask = false
+--     most things have description -> "Install {description} (y/n)? "
+--       others have prompt, which should be used "{prompt} (y/n)? " TODO change prompts to remove question marks!
+-- 2. go through packages selected and run them, making sure to order things that need to be specially ordered
+-- 3. run cleanup commands
+
+-- TODO there needs to be a way to avoid asking about things when a previous quesiton already answered it
+--   ie if docker was asked but not selected, the prompts that have it as a prerequisite should not be asked!
+--   I'll reuse ignore for this?
+
+-- fix formatting variations
+for _, package in pairs(packages) do
+  if package.description then
+    package.prompt = "Install " .. package.description
+  end
+  if type(package.apt) == "string" then
+    package.apt = { package.apt }
+  end
+  if type(package.prerequisites) == "string" then
+    package.prerequisites = { package.prerequisites }
+  end
+end
+
+-- choose what to run
+for name, package in pairs(packages) do
+  repeat -- dirty hack allowing break to function as continue
+    if package.selected or package.ignore or package.ask == false then
+      break -- continue
+    end
+
+    if package.prompt then
+      -- if a prerequisite has been marked ignore, continue!
+      if package.prerequisites then
+        local ignored_prerequisite = false
+        for _, name in ipairs(package.prerequisites) do
+          if packages[name].ignore then
+            ignored_prerequisite = true
+            break
+          end
+        end
+        if ignored_prerequisite then break end -- continue
+      end
+
+      if ask(package.prompt .. " (y/n)? ") then
+        package.selected = true
+        if package.prerequisites then
+          for _, name in ipairs(package.prerequisites) do
+            packages[name].selected = true
+          end
+        end
+      end
+    else
+      error("Package '" .. name .. "' lacks a prompt or description.")
+    end
+  until true -- end of dirty hack
+end
+
+-- rip and tear (run and delete) until it is done
+
+-- -- as packages are processed, they are deleted -> loop until nothing is left
+-- while next(packages) do
+--   for name, package in pairs(packages) do
+--   end
+-- end
+
+-- TODO this is where an initial update/upgrade/autoremove/autoclean should be performed!
+
+local done = false
+repeat
+  local skipped = false -- was anything skipped? (if so, we are not done!)
+  for name, package in pairs(packages) do
+    repeat -- continue hack
+
+      if package.prerequisites then
+        local prerequisites_met = true
+        for _, name in ipairs(package.prerequisites) do
+          if not packages[name].ignore then
+            prerequisites_met = false
+            break
+          end
+        end
+        if not prerequisites_met then
+          skipped = true
+          break -- continue (skipped, waiting until a pass has fufilled the prerequisites)
+        end
+      end
+
+      if package.ignore or (not package.selected) then
+        break -- continue (not a skip, because we are done with it)
+      end
+
+      print("Running '" .. name .. "'...")
+
+      if package.browse_to then
+        print("Opening your browser to a download page.\n  Make sure you choose the Debian (.deb) file and that it is saved to:\n    ~/Downloads")
+        -- os.execute("open " .. package.browse_to)
+        print("browse_to:", package.browse_to)
+        prompt("Press enter when the download is finished.")
+      end
+
+      if package.ppa then
+        -- os.execute("sudo add-apt-repository -y " .. package.ppa .. " && sudo apt-get update")
+        print("ppa:", package.ppa)
+      end
+      if package.apt then
+        -- os.execute("sudo apt-get install -y " .. table.concat(package.apt, " "))
+        print("apt:", table.concat(package.apt, " "))
+      end
+      if package.flatpak then
+        -- os.execute("flatpak install -y " .. table.concat(package.flatpak, " "))
+        print("flatpak:", table.concat(package.flatpak, " "))
+      end
+      if package.execute then
+        -- os.execute(package.execute)
+        print("execute: ", package.execute:sub(1, 32), #package.execute)
+      end
+
+      package.ignore = true -- this package must be done
+    until true -- continue hack
+  end
+
+  if not skipped then done = true end -- we are done if everything was processed
+until done
