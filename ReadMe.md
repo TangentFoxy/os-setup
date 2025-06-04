@@ -5,10 +5,10 @@ Scripts to make setting up a new system easier.. hopefully.
 Once I finish testing that it works as intended and fixing the arguments that
 can be passed to installer.lua, I will add info here and remove this warning.
 
-Download this repo by cloning it to get started:
+To use, run the following:
 
 ```
-sudo apt-get update && sudo apt-get install git -y &&
-  git clone https://github.com/TangentFoxy/os-setup --depth=1 &&
-  cd os-setup && ./run.sh
+sudo apt-get update && sudo apt-get install git -y \
+  && git clone https://github.com/TangentFoxy/os-setup --depth=1 \
+  && cd os-setup && ./run.sh
 ```

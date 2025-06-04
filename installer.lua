@@ -353,27 +353,25 @@ repeat
       end
 
       if package.browse_to then
-        print("Opening your browser to a download page.\n  Make sure you choose the Debian (.deb) file and that it is saved to:\n    ~/Downloads")
-        os.execute("open " .. package.browse_to)
+        print("Opening your browser to a download page.")
+        print("Make sure you choose the Debian (.deb) file and that it is saved to ~/Downloads")
+        os.execute("  open " .. package.browse_to)
         prompt("Press enter when the download is finished.", true)
       end
 
       if package.ppa then
-        os.execute("sudo add-apt-repository -y " .. package.ppa .. " && sudo apt-get update")
+        os.execute("  sudo add-apt-repository -y " .. package.ppa .. " && sudo apt-get update")
       end
       if package.apt then
-        os.execute("sudo apt-get install -y " .. table.concat(package.apt, " "))
+        os.execute("  sudo apt-get install -y " .. table.concat(package.apt, " "))
       end
       if package.flatpak then
         for _, name in ipairs(package.flatpak) do
-          os.execute("flatpak install -y " .. name)
+          os.execute("  flatpak install -y " .. name)
         end
       end
       if package.execute then
-        -- if package.execute:sub(1, 1) ~= " "
-
         os.execute(package.execute)
-
       elseif dry_run then
         io.write("\n")
       end
