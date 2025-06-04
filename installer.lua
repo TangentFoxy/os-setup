@@ -51,7 +51,6 @@ local packages = {
       sudo apt-get install librewolf -y
     ]],
     notes = "Need to find out why extrepo disabled librewolf on my system and whether or not this needs fixing.",
-    next = "purge-firefox", -- TODO this was an attempt at ordering for an optional prerequisite
   },
   luarocks = {
     description = "Luarocks (Lua package manager)",
@@ -97,7 +96,6 @@ local packages = {
       ./pia*.run
       rm ./pia*.run
     ]],
-    delay = true, -- TODO this was an attempt to make some actions go last so that GUIs don't interfere
   },
   telegram = {
     description = "Telegram Desktop (messenger)",
@@ -106,7 +104,6 @@ local packages = {
       find . -name 'tsetup*' -exec sudo tar -xf {} -C /opt \;
       /opt/Telegram/Telegram
     ]],
-    delay = true,
   },
   ["purge-firefox"] = {
     prompt = "Do you want to purge Firefox",
@@ -178,7 +175,6 @@ local packages = {
       ./import-private-config.lua
       # git config --global init.defaultBranch main   # I shouldn't need this soon hopefully..
     ]],
-    next = "git-credentials-libsecret",
   },
   ["unattended-upgrades"] = {
     prompt = "Would you like automatic background security updates",
@@ -221,6 +217,9 @@ local apt_upgrade = [[
   sudo apt-get autoclean
   sudo apt-get clean           # probably redundant
 ]]
+
+-- TODO add cleanup script here - or incorporate it into apt_upgrade, rename that, and rename the func: upgrade_and_clean
+--   the upgrade should also update flatpak probably.. and extrepo if installed
 
 local default_choice = "Y" -- TODO can be set by arguments (and will default to N)
 local dry_run = true       -- TEMP can be set by arguments (defaults to false)
