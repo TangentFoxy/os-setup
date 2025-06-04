@@ -106,6 +106,8 @@ local packages = {
     execute = [[
       ulimit -n 10000
       brew install mpv
+      # sudo curl --output-dir /etc/apt/trusted.gpg.d -O https://apt.fruit.je/fruit.gpg
+      # sudo sh -c 'echo "deb http://apt.fruit.je/debian trixie mpv" > /etc/apt/sources.list.d/fruit.list'
     ]],
     notes = "Linux Mint has Celluloid, a renamed/reskinned MPV. Don't install this there, it will be automatically ignored.",
     ignore = true,
@@ -207,5 +209,19 @@ local packages = {
   dsnote = {
     description = "Speech Note (speech-to-text notetaking)",
     flatpak = {"net.mkiol.SpeechNote", "net.mkiol.SpeechNote.Addon.nvidia", },
+    notes = "Assumes you have an NVIDIA GPU.",
+  },
+  ["docker-nvidia"] = {
+    description = "Docker NVIDIA support",
+    prerequisites = "docker",
+    execute = [[
+      curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
+        && curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
+          sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+          sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+      sudo apt-get install nvidia-container-toolkit -y
+      sudo nvidia-ctk runtime configure --runtime=docker
+      sudo systemctl restart docker
+    ]],
   },
 }
