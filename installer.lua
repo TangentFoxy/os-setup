@@ -1,27 +1,5 @@
 #!/usr/bin/env luajit
 
--- NOTE you can't actually backspace OR only read one character at a time. User must hit enter before anything happens.
--- io.write("Password: ")
--- local password = ""
--- while true do
---   local i = io.read(1)
---   if i == "\n" then
---     break
---   else
---     io.write("\b*")
---     password = password .. i
---   end
--- end
--- print("It was '" .. password .. "'")
-
-local commands = {
-  "sudo apt-get update",
-  "sudo apt-get upgrade -y",
-}
-
--- ask questions first
--- run prerequisites first, in a sensible order
--- run specific commands
 -- run cleanup
 
 local packages = {
@@ -131,7 +109,7 @@ local packages = {
     delay = true,
   },
   ["purge-firefox"] = {
-    prompt = "Do you want to purge Firefox?",
+    prompt = "Do you want to purge Firefox",
     execute = "sudo apt-get purge firefox -y",
   },
   steam = {
@@ -168,7 +146,7 @@ local packages = {
   nextcloud = { description = "NextCloud (desktop sync app)", apt = "nextcloud-desktop", },
   keepass = { description = "KeePassXC (password manager)", apt = "keepassxc", },
   ["reduce-logs"] = {
-    prompt = "Reduce default stored logs to 1 day and 10 MB maximums?",
+    prompt = "Reduce default stored logs to 1 day and 10 MB maximums",
     execute = [[
       sudo journalctl --vacuum-time=1d
       sudo journalctl --vacuum-size=10M
@@ -176,13 +154,13 @@ local packages = {
   },
   ollama = { description = "Ollama (CLI tool for running local models)", execute = "curl -fsSL https://ollama.com/install.sh | sh", ask = false, },
   ["git-credentials-insecure"] = {
-    prompt = "Configure Git to store credentials in plaintext\n  (this is a bad and insecure idea!)?",
+    prompt = "Configure Git to store credentials in plaintext\n  (this is a bad and insecure idea!)",
     prerequisites = "git",
     execute = "git config --global credential.helper store",
     ignore = true,
   },
   ["git-credentials-libsecret"] = {
-    prompt = "Configure Git to store credentials securely (using libsecret)?",
+    prompt = "Configure Git to store credentials securely (using libsecret)",
     prerequisites = {"git", "import-private-config"}, -- NOTE the second prerequisite here should be optional
     execute = [[
       sudo apt install libsecret-1-0 libsecret-1-dev libglib2.0-dev
@@ -191,7 +169,7 @@ local packages = {
     ]],
   },
   ["import-private-config"] = {
-    prompt = "Would you like to run a private config import script?",
+    prompt = "Would you like to run a private config import script",
     execute = [[
       echo "Press enter after a private config import script was saved to"
       read -p "  ~/Downloads/import-private-config.lua (or after you have run it)." dummy
@@ -203,7 +181,7 @@ local packages = {
     next = "git-credentials-libsecret",
   },
   ["unattended-upgrades"] = {
-    prompt = "Would you like automatic background security updates?",
+    prompt = "Would you like automatic background security updates",
     apt = "unattended-upgrades",
   },
   dsnote = {
@@ -236,24 +214,43 @@ local packages = {
   },
 }
 
+local apt_upgrade = [[
+  sudo apt-get update
+  sudo apt-get upgrade -y
+  sudo apt-get autoremove -y
+  sudo apt-get autoclean
+  sudo apt-get clean           # probably redundant
+]]
+
+local default_choice = "Y" -- TODO can be set by arguments (and will default to N)
+local dry_run = true       -- TEMP can be set by arguments (defaults to false)
+local interactive = false  -- TEMP will be true, but can be changed
+
 local function prompt(text)
   io.write(text)
-  return io.read("*line")
+  if interactive then
+    return io.read("*line")
+  else
+    io.write(default_choice .. "\n")
+    return ""
+  end
 end
 
 local function ask(text)
   local choice = prompt(text)
+  if #choice < 1 then choice = default_choice end
   if choice:sub(1):lower() == "y" then
     return true
   end
 end
 
--- 1. go through all packages asking for options
---     ignore things with ignore = true, don't ask about things with ask = false
---     most things have description -> "Install {description} (y/n)? "
---       others have prompt, which should be used "{prompt} (y/n)? " TODO change prompts to remove question marks!
--- 2. go through packages selected and run them, making sure to order things that need to be specially ordered
--- 3. run cleanup commands
+local function upgrade()
+  if dry_run then
+    print(apt_upgrade)
+  else
+    os.execute(apt_upgrade)
+  end
+end
 
 -- TODO there needs to be a way to avoid asking about things when a previous quesiton already answered it
 --   ie if docker was asked but not selected, the prompts that have it as a prerequisite should not be asked!
@@ -264,13 +261,18 @@ for _, package in pairs(packages) do
   if package.description then
     package.prompt = "Install " .. package.description
   end
-  if type(package.apt) == "string" then
-    package.apt = { package.apt }
-  end
   if type(package.prerequisites) == "string" then
     package.prerequisites = { package.prerequisites }
   end
+  if type(package.apt) == "string" then
+    package.apt = { package.apt }
+  end
+  if type(package.flatpak) == "string" then
+    package.flatpak = { package.flatpak }
+  end
 end
+
+-- TODO arguments must be processed here
 
 -- choose what to run
 for name, package in pairs(packages) do
@@ -292,7 +294,7 @@ for name, package in pairs(packages) do
         if ignored_prerequisite then break end -- continue
       end
 
-      if ask(package.prompt .. " (y/n)? ") then
+      if ask(package.prompt .. " (y/n)? ") then -- TODO modify to highlight default selected!
         package.selected = true
         if package.prerequisites then
           for _, name in ipairs(package.prerequisites) do
@@ -306,15 +308,9 @@ for name, package in pairs(packages) do
   until true -- end of dirty hack
 end
 
--- rip and tear (run and delete) until it is done
+io.write("\n") -- formatting
 
--- -- as packages are processed, they are deleted -> loop until nothing is left
--- while next(packages) do
---   for name, package in pairs(packages) do
---   end
--- end
-
--- TODO this is where an initial update/upgrade/autoremove/autoclean should be performed!
+upgrade()
 
 local done = false
 repeat
@@ -340,30 +336,50 @@ repeat
         break -- continue (not a skip, because we are done with it)
       end
 
-      print("Running '" .. name .. "'...")
+      if dry_run then
+        print("Simulating '" .. name .. "'...")
 
-      if package.browse_to then
-        print("Opening your browser to a download page.\n  Make sure you choose the Debian (.deb) file and that it is saved to:\n    ~/Downloads")
-        -- os.execute("open " .. package.browse_to)
-        print("browse_to:", package.browse_to)
-        prompt("Press enter when the download is finished.")
-      end
+        if package.browse_to then
+          print("  open " .. package.browse_to)
+        end
 
-      if package.ppa then
-        -- os.execute("sudo add-apt-repository -y " .. package.ppa .. " && sudo apt-get update")
-        print("ppa:", package.ppa)
-      end
-      if package.apt then
-        -- os.execute("sudo apt-get install -y " .. table.concat(package.apt, " "))
-        print("apt:", table.concat(package.apt, " "))
-      end
-      if package.flatpak then
-        -- os.execute("flatpak install -y " .. table.concat(package.flatpak, " "))
-        print("flatpak:", table.concat(package.flatpak, " "))
-      end
-      if package.execute then
-        -- os.execute(package.execute)
-        print("execute: ", package.execute:sub(1, 32), #package.execute)
+        if package.ppa then
+          print("  sudo add-apt-repository -y " .. package.ppa .. " && sudo apt-get update")
+        end
+        if package.apt then
+          print("  sudo apt-get install -y " .. table.concat(package.apt, " "))
+        end
+        if package.flatpak then
+          print("  flatpak install -y " .. table.concat(package.flatpak, " "))
+        end
+        if package.execute then
+          if package.execute:sub(1, 1) == " " then
+            print(package.execute)
+          else
+            print("  " .. package.execute .. "\n")
+          end
+        else
+          io.write("\n") -- formatting
+        end
+      else
+        if package.browse_to then
+          print("Opening your browser to a download page.\n  Make sure you choose the Debian (.deb) file and that it is saved to:\n    ~/Downloads")
+          os.execute("open " .. package.browse_to)
+          prompt("Press enter when the download is finished.")
+        end
+
+        if package.ppa then
+          os.execute("sudo add-apt-repository -y " .. package.ppa .. " && sudo apt-get update")
+        end
+        if package.apt then
+          os.execute("sudo apt-get install -y " .. table.concat(package.apt, " "))
+        end
+        if package.flatpak then
+          os.execute("flatpak install -y " .. table.concat(package.flatpak, " "))
+        end
+        if package.execute then
+          os.execute(package.execute)
+        end
       end
 
       package.ignore = true -- this package must be done
@@ -372,3 +388,5 @@ repeat
 
   if not skipped then done = true end -- we are done if everything was processed
 until done
+
+upgrade()
