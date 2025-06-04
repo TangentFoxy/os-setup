@@ -16,16 +16,22 @@ local packages = {
       brew install gcc
     ]],
   },
-  grayjay = {
+  ["grayjay-legacy"] = {
     description = "Grayjay (stream videos directly from your favorite creators)",
     execute = [[
       curl -O https://updater.grayjay.app/Apps/Grayjay.Desktop/Grayjay.Desktop-linux-x64.zip
       unzip Grayjay*.zip
       mkdir -p ~/Applications/Grayjay
       mv ./Grayjay*/* ~/Applications/Grayjay/
+      rm -r ./Grayjay*
       ~/Applications/Grayjay
     ]],
-    notes = "Need to figure out how to make sure this gets in the menu.",
+    notes = "https://github.com/futo-org/Grayjay.Desktop/issues/439#issuecomment-2869188750 explains how to add this to the menu, but I'm going to try using the flatpak version instead.",
+    ignore = true,
+  },
+  grayjay = {
+    description = "Grayjay (stream videos directly from your favorite creators)",
+    flatpak = "flathub app.grayjay.Grayjay",
   },
   docker = {
     description = "Docker (containers!)",
@@ -102,6 +108,7 @@ local packages = {
     execute = [[
       curl -O https://telegram.org/dl/desktop/linux
       find . -name 'tsetup*' -exec sudo tar -xf {} -C /opt \;
+      rm ./tsetup*
       /opt/Telegram/Telegram
     ]],
   },
@@ -173,6 +180,7 @@ local packages = {
       cd ~/Downloads
       chmod +x ./import-private-config.lua
       ./import-private-config.lua
+      rm ./import-private-config.lua
       # git config --global init.defaultBranch main   # I shouldn't need this soon hopefully..
     ]],
   },
@@ -225,12 +233,13 @@ local default_choice = "Y" -- TODO can be set by arguments (and will default to 
 local dry_run = true       -- TEMP can be set by arguments (defaults to false)
 local interactive = false  -- TEMP will be true, but can be changed
 
-local function prompt(text)
+local function prompt(text, hide_default_entry)
   io.write(text)
   if interactive then
     return io.read("*line")
   else
-    io.write(default_choice .. "\n")
+    if not hide_default_entry then io.write(default_choice) end
+    io.write("\n")
     return ""
   end
 end
@@ -271,6 +280,9 @@ for _, package in pairs(packages) do
   end
   if not package.prerequisites then
     package.prerequisites = {}
+  end
+  if package.execute and package.execute:sub(1, 1) ~= " " then -- pretty formatting for dry_run
+    package.execute = "      " .. package.execute .. "\n"
   end
 end
 
@@ -335,48 +347,35 @@ repeat
 
       if dry_run then
         print("Simulating '" .. name .. "'...")
+        os.execute = function(command)
+          print(command)
+        end
+      end
 
-        if package.browse_to then
-          print("  open " .. package.browse_to)
-        end
+      if package.browse_to then
+        print("Opening your browser to a download page.\n  Make sure you choose the Debian (.deb) file and that it is saved to:\n    ~/Downloads")
+        os.execute("open " .. package.browse_to)
+        prompt("Press enter when the download is finished.", true)
+      end
 
-        if package.ppa then
-          print("  sudo add-apt-repository -y " .. package.ppa .. " && sudo apt-get update")
+      if package.ppa then
+        os.execute("sudo add-apt-repository -y " .. package.ppa .. " && sudo apt-get update")
+      end
+      if package.apt then
+        os.execute("sudo apt-get install -y " .. table.concat(package.apt, " "))
+      end
+      if package.flatpak then
+        for _, name in ipairs(package.flatpak) do
+          os.execute("flatpak install -y " .. name)
         end
-        if package.apt then
-          print("  sudo apt-get install -y " .. table.concat(package.apt, " "))
-        end
-        if package.flatpak then
-          print("  flatpak install -y " .. table.concat(package.flatpak, " "))
-        end
-        if package.execute then
-          if package.execute:sub(1, 1) == " " then
-            print(package.execute)
-          else
-            print("      " .. package.execute .. "\n") -- matches the spacing of blocks so that output is consistent
-          end
-        else
-          io.write("\n") -- formatting
-        end
-      else
-        if package.browse_to then
-          print("Opening your browser to a download page.\n  Make sure you choose the Debian (.deb) file and that it is saved to:\n    ~/Downloads")
-          os.execute("open " .. package.browse_to)
-          prompt("Press enter when the download is finished.")
-        end
+      end
+      if package.execute then
+        -- if package.execute:sub(1, 1) ~= " "
 
-        if package.ppa then
-          os.execute("sudo add-apt-repository -y " .. package.ppa .. " && sudo apt-get update")
-        end
-        if package.apt then
-          os.execute("sudo apt-get install -y " .. table.concat(package.apt, " "))
-        end
-        if package.flatpak then
-          os.execute("flatpak install -y " .. table.concat(package.flatpak, " "))
-        end
-        if package.execute then
-          os.execute(package.execute)
-        end
+        os.execute(package.execute)
+
+      elseif dry_run then
+        io.write("\n")
       end
 
       package.ignore = true -- this package must be done
