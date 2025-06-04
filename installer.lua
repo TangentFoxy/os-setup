@@ -33,7 +33,7 @@ local packages = {
   },
   ["docker-compose-legacy"] = {
     description = "docker-compose (Python script, legacy)",
-    prerequisites = {"docker"},
+    prerequisites = "docker",
     apt = { "python3-setuptools", "docker-compose", },
   },
   ["docker-compose"] = {
@@ -255,7 +255,7 @@ end
 --   ie if docker was asked but not selected, the prompts that have it as a prerequisite should not be asked!
 --   I'll reuse ignore for this?
 
--- fix formatting variations
+-- sanitize formatting variations
 for _, package in pairs(packages) do
   if package.description then
     package.prompt = "Install " .. package.description
@@ -269,6 +269,9 @@ for _, package in pairs(packages) do
   if type(package.flatpak) == "string" then
     package.flatpak = { package.flatpak }
   end
+  if not package.prerequisites then
+    package.prerequisites = {}
+  end
 end
 
 -- TODO arguments must be processed here
@@ -276,29 +279,26 @@ end
 -- choose what to run
 for name, package in pairs(packages) do
   repeat -- dirty hack allowing break to function as continue
-    if package.selected or package.ignore or package.ask == false then
+    if package.selected or package.ignore or (package.ask == false) then
       break -- continue
     end
 
     if package.prompt then
       -- if a prerequisite has been marked ignore, continue!
-      if package.prerequisites then
-        local ignored_prerequisite = false
-        for _, name in ipairs(package.prerequisites) do
-          if packages[name].ignore then
-            ignored_prerequisite = true
-            break
-          end
+      local ignored_prerequisite = false
+      for _, name in ipairs(package.prerequisites) do
+        if packages[name].ignore then
+          ignored_prerequisite = true
+          break
         end
-        if ignored_prerequisite then break end -- continue
       end
+      if ignored_prerequisite then break end -- continue
 
-      if ask(package.prompt .. " (y/n)? ") then -- TODO modify to highlight default selected!
+      if ask(package.prompt .. " (y/n, default: " .. default_choice .. ")? ") then
         package.selected = true
-        if package.prerequisites then
-          for _, name in ipairs(package.prerequisites) do
-            packages[name].selected = true
-          end
+        for _, name in ipairs(package.prerequisites) do
+          packages[name].selected = true
+          packages[name].ignore = false
         end
       end
     else
@@ -317,18 +317,16 @@ repeat
   for name, package in pairs(packages) do
     repeat -- continue hack
 
-      if package.prerequisites then
-        local prerequisites_met = true
-        for _, name in ipairs(package.prerequisites) do
-          if not packages[name].ignore then
-            prerequisites_met = false
-            break
-          end
+      local prerequisites_met = true
+      for _, name in ipairs(package.prerequisites) do
+        if not packages[name].ignore then
+          prerequisites_met = false
+          break
         end
-        if not prerequisites_met then
-          skipped = true
-          break -- continue (skipped, waiting until a pass has fufilled the prerequisites)
-        end
+      end
+      if not prerequisites_met then
+        skipped = true
+        break -- continue (skipped, waiting until a pass has fufilled the prerequisites)
       end
 
       if package.ignore or (not package.selected) then
@@ -355,7 +353,7 @@ repeat
           if package.execute:sub(1, 1) == " " then
             print(package.execute)
           else
-            print("  " .. package.execute .. "\n")
+            print("      " .. package.execute .. "\n") -- matches the spacing of blocks so that output is consistent
           end
         else
           io.write("\n") -- formatting
