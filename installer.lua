@@ -96,9 +96,9 @@ local packages = {
     execute = [[
       cd Downloads
       sudo dpkg -i obsidian*.deb
+      sudo apt-get install -f
       rm obsidian*.deb
     ]],
-    notes = "I don't remember how to fix a deb install without dependencies. It's either dpkig -if or apt-get install -f",
   },
   mpv = {
     description = "MPV (media player)",
@@ -141,8 +141,9 @@ local packages = {
     execute = [[
       curl -LO https://cdn.fastly.steamstatic.com/client/installer/steam.deb
       sudo dpkg -i steam.deb
+      sudo apt-get install -f
+      rm steam.deb
     ]],
-    notes = "Fix dpkg? Doesn't launch it because it running can screw up other parts of this script. :D",
   },
   waydroid = {
     description = "Waydroid (Android-on-Wayland)",
@@ -161,9 +162,10 @@ local packages = {
     execute = [[
       cd Downloads
       sudo dpkg -i Linux.pulsar*.deb
+      sudo apt-get install -f
+      rm Linux.pulsar*.deb
       pulsar -p install language-lua language-moonscript minimap language-docker   # I shouldn't assume you want these all
     ]],
-    notes = "Fix dpkg.",
   },
   nextcloud = { description = "NextCloud (desktop sync app)", apt = "nextcloud-desktop", },
   keepass = { description = "KeePassXC (password manager)", apt = "keepassxc", },
@@ -222,6 +224,16 @@ local packages = {
       sudo apt-get install nvidia-container-toolkit -y
       sudo nvidia-ctk runtime configure --runtime=docker
       sudo systemctl restart docker
+    ]],
+  },
+  ["1password"] = {
+    description = "1password (password manager & security key)",
+    execute = [[
+      cd Downloads
+      curl -O https://downloads.1password.com/linux/debian/amd64/stable/1password-latest.deb
+      sudo dpkg -i 1password-latest.deb
+      sudo apt-get install -f
+      rm 1password-latest.deb
     ]],
   },
 }
