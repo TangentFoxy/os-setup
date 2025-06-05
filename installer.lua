@@ -216,6 +216,36 @@ local packages = {
       rm 1password-latest.deb
     ]],
   },
+  ["virtualbox-7.1"] = {
+    description = "VirtualBox 7.1 (OS virtualizer)",
+    execute = [[
+      # sudo apt install curl wget apt-transport-https gnupg2 -y   # what a dumb idea, these will be installed if needed, duh
+      curl -fsSL https://www.virtualbox.org/download/oracle_vbox_2016.asc | sudo gpg --dearmor -o /usr/share/keyrings/oracle-virtualbox-2016.gpg
+      echo "deb [arch=amd64 signed-by=/usr/share/keyrings/oracle-virtualbox-2016.gpg] https://download.virtualbox.org/virtualbox/debian noble contrib" | sudo tee /etc/apt/sources.list.d/virtualbox.list
+      sudo apt-get update
+      sudo apt-get install -y virtualbox-7.1   # should find a way to make this find and get the latest version instead
+      sudo adduser $USER vboxusers             # requires re-login
+      newgrp vboxusers                         # was supposed to prevent relogging requirement, appears to not function
+
+      cd ~/Downloads
+      wget https://download.virtualbox.org/virtualbox/7.1.4/Oracle_VirtualBox_Extension_Pack-7.1.4.vbox-extpack
+      sudo vboxmanage extpack install Oracle_VirtualBox_Extension_Pack-7.1.4.vbox-extpack --accept-license=eb31505e56e9b4d0fbca139104da41ac6f6b98f8e78968bdf01b1f3da3c4f9ae
+      rm ./Oracle_VirtualBox_Extension_Pack*.vbox-extpack
+    ]],
+  },
+  virtualbox = {
+    description = "VirtualBox (OS virtualizer)", apt = "virtualbox", ignore = true, -- NOTE will probably favor this in the future?
+  },
+  lutris = {
+    description = "Lutris (video game preservation platform)",
+    browse_to = "https://github.com/lutris/lutris/releases",
+    execute = [[
+      cd ~/Downloads
+      sudo dpkg -i lutris*.deb
+      sudo apt-get install -f
+      rm lutris*.deb
+    ]],
+  },
 }
 
 local apt_upgrade = [[
