@@ -1,8 +1,26 @@
 #!/usr/bin/env luajit
 
--- run cleanup
+local options = {
+  default_choice = "Y", -- TODO can be set by arguments (and will default to N)
+  dry_run = true,       -- TEMP can be set by arguments (defaults to false)
+  interactive = false,  -- TEMP will be true, but can be changed
+}
 
 local packages = {
+  ["system-upgrade"] = {
+    -- this is just run automatically at the beginning and end of this script
+    prompt = "Upgrade all packages?",
+    execute = [[
+      which -s extrepo && sudo extrepo update
+      sudo apt-get update
+      sudo apt-get upgrade -y
+      sudo apt-get autoremove -y
+      sudo apt-get autoclean
+      sudo apt-get clean
+      flatpak update
+    ]],
+    ignore = true, -- NOTE maybe should be "autorun" or "internal" or something when enum is added
+  },
   git = { apt = "git", description = "Git (version control)", },
   brew = {
     description = "Brew (user-space package manager, originally for macOS)",
@@ -24,7 +42,6 @@ local packages = {
       mkdir -p ~/Applications/Grayjay
       mv ./Grayjay*/* ~/Applications/Grayjay/
       rm -r ./Grayjay*
-      ~/Applications/Grayjay
     ]],
     notes = "https://github.com/futo-org/Grayjay.Desktop/issues/439#issuecomment-2869188750 explains how to add this to the menu, but I'm going to try using the flatpak version instead.",
     ignore = true,
@@ -81,17 +98,25 @@ local packages = {
       rm obsidian*.deb
     ]],
   },
-  mpv = {
+  ["mpv-from-brew"] = {
     description = "MPV (media player)",
     prerequisites = "brew",
     execute = [[
       ulimit -n 10000   # brew devs refuse to fix this https://github.com/Homebrew/brew/issues/9120
       brew install mpv
-      # sudo curl --output-dir /etc/apt/trusted.gpg.d -O https://apt.fruit.je/fruit.gpg
-      # sudo sh -c 'echo "deb http://apt.fruit.je/debian trixie mpv" > /etc/apt/sources.list.d/fruit.list'
     ]],
     notes = "Linux Mint has Celluloid, a renamed/reskinned MPV. Don't install this there, it will be automatically ignored.",
     ignore = true,
+  },
+  mpv = {
+    description = "MPV (media player)",
+    execute = [[
+      sudo curl --output-dir /etc/apt/trusted.gpg.d -O https://apt.fruit.je/fruit.gpg
+      sudo sh -c 'echo "deb http://apt.fruit.je/debian trixie mpv" > /etc/apt/sources.list.d/fruit.list'
+      sudo apt-get update
+      sudo apt-get install -y mpv
+    ]],
+    -- TODO needs to be ignored on Mint?
   },
   pia = {
     description = "Private Internet Access (cheap, secure VPN)",
@@ -109,12 +134,13 @@ local packages = {
       curl -O https://telegram.org/dl/desktop/linux
       find . -name 'tsetup*' -exec sudo tar -xf {} -C /opt \;
       rm ./tsetup*
-      /opt/Telegram/Telegram
+      /opt/Telegram/Telegram   # it adds itself to the menu when launched
     ]],
   },
   ["purge-firefox"] = {
     prompt = "Do you want to purge Firefox",
     execute = "sudo apt-get purge firefox -y",
+    prerequisites = "librewolf", -- TEMP it just needs to know SOME browser is installed (see #13)
   },
   steam = {
     description = "Steam (video game platform)",
@@ -147,10 +173,13 @@ local packages = {
       pulsar -p install language-lua language-moonscript minimap language-docker   # I shouldn't assume you want these all
     ]],
   },
-  nextcloud = { description = "NextCloud (desktop sync app)", apt = "nextcloud-desktop", },
+  nextcloud = {
+    description = "NextCloud (desktop sync app)", apt = "nextcloud-desktop",
+    notes = "NextCloud's sync dialog upon initially connecting to a server works badly.\n Set up your connection without file sync, then add it from the app.",
+  },
   keepass = { description = "KeePassXC (password manager)", apt = "keepassxc", },
   ["reduce-logs"] = {
-    prompt = "Reduce default stored logs to 1 day and 10 MB maximums",
+    prompt = "Reduce stored logs to 1 day / 10 MB",
     execute = [[
       sudo journalctl --vacuum-time=1d
       sudo journalctl --vacuum-size=10M
@@ -232,6 +261,7 @@ local packages = {
       sudo vboxmanage extpack install Oracle_VirtualBox_Extension_Pack-7.1.4.vbox-extpack --accept-license=eb31505e56e9b4d0fbca139104da41ac6f6b98f8e78968bdf01b1f3da3c4f9ae
       rm ./Oracle_VirtualBox_Extension_Pack*.vbox-extpack
     ]],
+    ignore = true,
   },
   virtualbox = {
     description = "VirtualBox (OS virtualizer)", apt = "virtualbox", ignore = true, -- NOTE will probably favor this in the future?
@@ -246,29 +276,25 @@ local packages = {
       rm lutris*.deb
     ]],
   },
+  openttd = {
+    description = "Open Transport Tycoon Deluxe (transport strategy game)",
+    browse_to = "https://www.openttd.org/downloads/openttd-releases/latest",
+    execute = [[
+      cd ~/Downloads
+      mkdir -p ~/Applications/OpenTTD
+      find . -name 'openttd*' -exec sudo tar -xf {} -C ~/Applications/OpenTTD \;
+      # mv ./openttd*/* ~/Applications/OpenTTD/
+      rm -r ./openttd*
+    ]],
+  },
 }
-
-local apt_upgrade = [[
-  sudo apt-get update
-  sudo apt-get upgrade -y
-  sudo apt-get autoremove -y
-  sudo apt-get autoclean
-  sudo apt-get clean           # probably redundant
-]]
-
--- TODO add cleanup script here - or incorporate it into apt_upgrade, rename that, and rename the func: upgrade_and_clean
---   the upgrade should also update flatpak probably.. and extrepo if installed
-
-local default_choice = "Y" -- TODO can be set by arguments (and will default to N)
-local dry_run = true       -- TEMP can be set by arguments (defaults to false)
-local interactive = false  -- TEMP will be true, but can be changed
 
 local function prompt(text, hide_default_entry)
   io.write(text)
-  if interactive then
+  if options.interactive then
     return io.read("*line")
   else
-    if not hide_default_entry then io.write(default_choice) end
+    if not hide_default_entry then io.write(options.default_choice) end
     io.write("\n")
     return ""
   end
@@ -276,17 +302,17 @@ end
 
 local function ask(text)
   local choice = prompt(text)
-  if #choice < 1 then choice = default_choice end
+  if #choice < 1 then choice = options.default_choice end
   if choice:sub(1):lower() == "y" then
     return true
   end
 end
 
-local function upgrade()
-  if dry_run then
-    print(apt_upgrade)
+local function system_upgrade()
+  if options.dry_run then
+    print(packages["system-upgrade"].execute)
   else
-    os.execute(apt_upgrade)
+    os.execute(packages["system-upgrade"].execute)
   end
 end
 
@@ -316,7 +342,7 @@ for _, package in pairs(packages) do
   end
 end
 
--- TODO arguments must be processed here
+-- TODO arguments must be processed by here
 
 -- choose what to run
 for name, package in pairs(packages) do
@@ -336,7 +362,7 @@ for name, package in pairs(packages) do
       end
       if ignored_prerequisite then break end -- continue
 
-      if ask(package.prompt .. " (y/n, default: " .. default_choice .. ")? ") then
+      if ask(package.prompt .. " (y/n, default: " .. options.default_choice .. ")? ") then
         package.selected = true
         for _, name in ipairs(package.prerequisites) do
           packages[name].selected = true
@@ -351,7 +377,7 @@ end
 
 io.write("\n") -- formatting
 
-upgrade()
+system_upgrade()
 
 local done = false
 repeat
@@ -375,7 +401,7 @@ repeat
         break -- continue (not a skip, because we are done with it)
       end
 
-      if dry_run then
+      if options.dry_run then
         print("Simulating '" .. name .. "'...")
         os.execute = function(command)
           print(command)
@@ -402,7 +428,7 @@ repeat
       end
       if package.execute then
         os.execute(package.execute)
-      elseif dry_run then
+      elseif options.dry_run then
         io.write("\n")
       end
 
@@ -413,4 +439,4 @@ repeat
   if not skipped then done = true end -- we are done if everything was processed
 until done
 
-upgrade()
+system_upgrade()
