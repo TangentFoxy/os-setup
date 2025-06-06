@@ -295,6 +295,13 @@ local packages = {
       # mv ./openttd*/* ~/Applications/OpenTTD/
       rm -r ./openttd*
     ]],
+    desktop = { -- never use special characters here D:
+      name = "OpenTTD",
+      path = "~/Applications/OpenTTD",
+      exec = "~/Applications/OpenTTD/openttd",
+      icon = "~/Applications/OpenTTD/share/icons/hicolor/256x256/apps/openttd.png",
+      categories = {"Game", "StrategyGame"},
+    },
   },
 }
 
@@ -435,9 +442,33 @@ repeat
           os.execute("  flatpak install -y " .. name)
         end
       end
+
       if package.execute then
         os.execute(package.execute)
       elseif options.dry_run then
+        io.write("\n")
+      end
+
+      if package.desktop then
+        local desktop = package.desktop
+        local desktop_file_name = desktop.path .. "/" .. desktop.name .. ".desktop"
+        local lines = {
+          "[Desktop Entry]",
+          "Name=" .. desktop.name,
+          "Path=" .. desktop.path,
+          "Exec=" .. desktop.exec,
+          "Icon=" .. desktop.icon,
+          "Terminal=false",
+          "Type=Application",
+          "Categories=" .. table.concat(desktop.categories, "\\;"),
+        }
+        for _, line in ipairs(lines) do
+          os.execute("  echo " .. line .. " >> " .. desktop_file_name)
+        end
+        os.execute("  chmod +x " .. desktop_file_name)
+        os.execute("  desktop-file-validate " .. desktop_file_name)
+        os.execute("  desktop-file-install --dir=$HOME/.local/share/applications " .. desktop_file_name)
+        os.execute("  update-desktop-database ~/.local/share/applications") -- appears to be unnecessary on Mint
         io.write("\n")
       end
 
@@ -446,6 +477,8 @@ repeat
   end
 
   if not skipped then done = true end -- we are done if everything was processed
+
+  print("looping forever D:")
 until done
 
 system_upgrade()
