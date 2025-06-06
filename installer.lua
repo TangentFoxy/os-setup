@@ -1,15 +1,24 @@
 #!/usr/bin/env luajit
 
-local options = {
-  default_choice = "Y", -- TODO can be set by arguments (and will default to N)
-  dry_run = true,       -- TEMP can be set by arguments (defaults to false)
-  interactive = false,  -- TEMP will be true, but can be changed
-}
+local argparse = require "argparse"
+
+local parser = argparse()
+-- parser:argument("package", "Select specific package(s)."):args("*")
+parser:option("--default-choice", "Default answer to prompts.", "N"):choices{"Y", "N"}:args(1):overwrite(false)
+parser:flag("--dry-run", "Output the commands that would be run instead of running them."):overwrite(false)
+parser:option("--interactive", "Wait for user input.", "true"):choices{"true", "false"}:overwrite(false)
+
+local options = parser:parse()
+
+if options.interactive == "false" then
+  options.interactive = false
+  -- don't need to bother converting "true" to true because its truthy
+end
 
 local packages = {
   ["system-upgrade"] = {
     -- this is just run automatically at the beginning and end of this script
-    prompt = "Upgrade all packages?",
+    prompt = "Upgrade all packages",
     execute = [[
       which -s extrepo && sudo extrepo update
       sudo apt-get update

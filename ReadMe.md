@@ -12,3 +12,7 @@ sudo apt-get update && sudo apt-get install git -y \
   && git clone https://github.com/TangentFoxy/os-setup --depth=1 \
   && cd os-setup && ./run.sh
 ```
+
+---
+
+Note: Using [luarocks/argparse](https://github.com/luarocks/argparse). Other implementations are inferior.
