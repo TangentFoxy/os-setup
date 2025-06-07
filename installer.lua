@@ -336,8 +336,24 @@ end
 --   ie if docker was asked but not selected, the prompts that have it as a prerequisite should not be asked!
 --   I'll reuse ignore for this?
 
--- sanitize formatting variations
-for _, package in pairs(packages) do
+local function enumerate(list)
+  local result = {}
+  for _, value in ipairs(list) do
+    result[value] = {}
+  end
+  return result
+end
+
+local states = enumerate({ "IGNORED", "TO_ASK", "TO_INSTALL", "INSTALLED", })
+
+-- sanitize formatting variations (and check for errors)
+for name, package in pairs(packages) do
+  if package.ask or package.ask == nil then
+    package.status = states.TO_ASK
+  end
+  if package.ignore then
+    package.status = states.IGNORED
+  end
   if package.description then
     package.prompt = "Install " .. package.description
   end
@@ -356,129 +372,135 @@ for _, package in pairs(packages) do
   if package.execute and package.execute:sub(1, 1) ~= " " then -- pretty formatting for dry_run
     package.execute = "      " .. package.execute .. "\n"
   end
+
+  if not package.prompt then
+    error("Package '" .. name .. "' lacks a prompt or description.\nPlease report this issue at https://github.com/TangentFoxy/os-setup/issues\n")
+  end
+  -- TODO check for other types of error
 end
 
--- TODO arguments must be processed by here
-
 -- choose what to run
-for name, package in pairs(packages) do
-  repeat -- dirty hack allowing break to function as continue
-    if package.selected or package.ignore or (package.ask == false) then
-      break -- continue
+for _, package in pairs(packages) do
+  local function _ask(package)
+    if not (package.status == states.TO_ASK) then
+      return
     end
 
-    if package.prompt then
-      -- if a prerequisite has been marked ignore, continue!
-      local ignored_prerequisite = false
+    for _, name in ipairs(package.prerequisites) do
+      if packages[name].status == states.IGNORED then
+        return
+      end
+    end
+
+    if ask(package.prompt .. " (y/n, default: " .. options.default_choice .. ")? ") then
+      package.status = states.TO_INSTALL
       for _, name in ipairs(package.prerequisites) do
-        if packages[name].ignore then
-          ignored_prerequisite = true
-          break
-        end
+        packages[name].status = states.TO_INSTALL
       end
-      if ignored_prerequisite then break end -- continue
-
-      if ask(package.prompt .. " (y/n, default: " .. options.default_choice .. ")? ") then
-        package.selected = true
-        for _, name in ipairs(package.prerequisites) do
-          packages[name].selected = true
-          packages[name].ignore = false
-        end
-      end
-    else
-      error("Package '" .. name .. "' lacks a prompt or description.")
     end
-  until true -- end of dirty hack
+  end
+
+  _ask(package)
 end
 
 io.write("\n") -- formatting
 
 system_upgrade()
 
+local function execute(...)
+  if options.dry_run then
+    return print(...)
+  else
+    return os.execute(...)
+  end
+end
+
+local function create_menu_entry(desktop)
+  local desktop_file_name = desktop.path .. "/" .. desktop.name .. ".desktop"
+  local lines = {
+    "[Desktop Entry]",
+    "Name=" .. desktop.name,
+    "Path=" .. desktop.path,
+    "Exec=" .. desktop.exec,
+    "Icon=" .. desktop.icon,
+    "Terminal=false",
+    "Type=Application",
+    "Categories=" .. table.concat(desktop.categories, "\\;"),
+  }
+  for _, line in ipairs(lines) do
+    execute("  echo " .. line .. " >> " .. desktop_file_name)
+  end
+  execute("  chmod +x " .. desktop_file_name)
+  execute("  desktop-file-validate " .. desktop_file_name)
+  execute("  desktop-file-install --dir=$HOME/.local/share/applications " .. desktop_file_name)
+  execute("  update-desktop-database ~/.local/share/applications") -- appears to be unnecessary on Mint
+  if options.dry_run then
+    io.write("\n")
+  end
+end
+
 local done = false
 repeat
-  local skipped = false -- was anything skipped? (if so, we are not done!)
-  for name, package in pairs(packages) do
-    repeat -- continue hack
 
-      local prerequisites_met = true
+  for _, package in pairs(packages) do
+    local function _install(package)
+      if not (package.status == states.TO_INSTALL) then
+        return
+      end
+
       for _, name in ipairs(package.prerequisites) do
-        if not packages[name].ignore then
-          prerequisites_met = false
-          break
+        if not packages[name].status == states.INSTALLED then
+          return
         end
-      end
-      if not prerequisites_met then
-        skipped = true
-        break -- continue (skipped, waiting until a pass has fufilled the prerequisites)
-      end
-
-      if package.ignore or (not package.selected) then
-        break -- continue (not a skip, because we are done with it)
       end
 
       if options.dry_run then
         print("Simulating '" .. name .. "'...")
-        os.execute = function(command)
-          print(command)
-        end
       end
 
       if package.browse_to then
         print("Opening your browser to a download page.")
         print("Make sure you choose the Debian (.deb) file and that it is saved to ~/Downloads")
-        os.execute("  open " .. package.browse_to)
+        execute("  open " .. package.browse_to)
         prompt("Press enter when the download is finished.", true)
       end
 
       if package.ppa then
-        os.execute("  sudo add-apt-repository -y " .. package.ppa .. " && sudo apt-get update")
+        execute("  sudo add-apt-repository -y " .. package.ppa .. " && sudo apt-get update")
       end
       if package.apt then
-        os.execute("  sudo apt-get install -y " .. table.concat(package.apt, " "))
+        execute("  sudo apt-get install -y " .. table.concat(package.apt, " "))
       end
       if package.flatpak then
         for _, name in ipairs(package.flatpak) do
-          os.execute("  flatpak install -y " .. name)
+          execute("  flatpak install -y " .. name)
         end
       end
 
       if package.execute then
-        os.execute(package.execute)
+        execute(package.execute)
       elseif options.dry_run then
         io.write("\n")
       end
 
       if package.desktop then
-        local desktop = package.desktop
-        local desktop_file_name = desktop.path .. "/" .. desktop.name .. ".desktop"
-        local lines = {
-          "[Desktop Entry]",
-          "Name=" .. desktop.name,
-          "Path=" .. desktop.path,
-          "Exec=" .. desktop.exec,
-          "Icon=" .. desktop.icon,
-          "Terminal=false",
-          "Type=Application",
-          "Categories=" .. table.concat(desktop.categories, "\\;"),
-        }
-        for _, line in ipairs(lines) do
-          os.execute("  echo " .. line .. " >> " .. desktop_file_name)
-        end
-        os.execute("  chmod +x " .. desktop_file_name)
-        os.execute("  desktop-file-validate " .. desktop_file_name)
-        os.execute("  desktop-file-install --dir=$HOME/.local/share/applications " .. desktop_file_name)
-        os.execute("  update-desktop-database ~/.local/share/applications") -- appears to be unnecessary on Mint
-        io.write("\n")
+        create_menu_entry(package.desktop)
       end
 
-      package.ignore = true -- this package must be done
-    until true -- continue hack
+      package.status = states.INSTALLED
+    end
+
+    _install(package)
   end
 
-  if not skipped then done = true end -- we are done if everything was processed
+  done = true
+  for _, package in pairs(packages) do
+    if package.status == states.TO_INSTALL then
+      done = false
+      break
+    end
+  end
 
-  print("looping forever D:")
 until done
 
 system_upgrade()
