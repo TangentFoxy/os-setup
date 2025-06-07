@@ -306,6 +306,12 @@ local packages = {
       categories = {"Game", "StrategyGame"},
     },
   },
+  ["ubuntu-drivers"] = {
+    description = "ubuntu-drivers autoinstall (will find and install missing drivers)",
+    apt = "ubuntu-drivers-common",
+    execute = "ubuntu-drivers autoinstall", -- NOTE I think this needs sudo, but it hasn't errored when not using sudo so I'm confused
+    notes = "Obviously, this should only be run on Ubuntu-derived systems.",
+  },
 }
 
 local function prompt(text, hide_default_entry)
@@ -447,12 +453,12 @@ repeat
 
   for name, package in pairs(packages) do
     local function _install(name, package)
-      if not (package.status == states.TO_INSTALL) then
+      if package.status ~= states.TO_INSTALL then
         return
       end
 
       for _, name in ipairs(package.prerequisites) do
-        if not packages[name].status == states.INSTALLED then
+        if packages[name].status ~= states.INSTALLED then
           return
         end
       end
