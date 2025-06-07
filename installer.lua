@@ -73,7 +73,10 @@ local packages = {
     prerequisites = "docker",
     apt = "docker-compose-v2",
   },
-  extrepo = { ask = false, apt = "extrepo", },
+  extrepo = {
+    description = "extrepo (makes it easy to manage external repositories)",
+    ask = false, apt = "extrepo",
+  },
   librewolf = {
     description = "Librewolf (privacy-preserving Firefox fork)",
     prerequisites = "extrepo",
@@ -442,8 +445,8 @@ end
 local done = false
 repeat
 
-  for _, package in pairs(packages) do
-    local function _install(package)
+  for name, package in pairs(packages) do
+    local function _install(name, package)
       if not (package.status == states.TO_INSTALL) then
         return
       end
@@ -490,7 +493,7 @@ repeat
       package.status = states.INSTALLED
     end
 
-    _install(package)
+    _install(name, package)
   end
 
   done = true
