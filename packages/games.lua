@@ -36,6 +36,7 @@ return {
       icon = "~/Applications/OpenTTD/share/icons/hicolor/256x256/apps/openttd.png",
       categories = {"Game", "StrategyGame"},
     },
+    ignore = true,
   },
   ["stunt-rally"] = {
     description = "StuntRally (rally racing game)",
@@ -47,5 +48,6 @@ return {
       mv ./StuntRally*/StuntRally*/* ~/Applications/StuntRally/
       rm -r ./StuntRally*
     ]],
+    ignore = true,
   },
 }

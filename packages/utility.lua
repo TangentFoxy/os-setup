@@ -7,7 +7,6 @@ return {
       sudo apt-get update
       sudo apt-get install librewolf -y
     ]],
-    notes = "Need to find out why extrepo disabled librewolf on my system and whether or not this needs fixing.",
   },
   pia = {
     description = "Private Internet Access (cheap, secure VPN)",
