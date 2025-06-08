@@ -22,7 +22,7 @@ return {
     execute = [[
       cd ~/Downloads
       sudo dpkg -i obsidian*.deb
-      sudo apt-get install -f
+      sudo apt-get install -fy
       rm obsidian*.deb
     ]],
   },

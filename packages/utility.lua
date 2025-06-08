@@ -34,7 +34,7 @@ return {
     execute = [[
       cd ~/Downloads
       sudo dpkg -i Linux.pulsar*.deb
-      sudo apt-get install -f
+      sudo apt-get install -fy
       rm Linux.pulsar*.deb
       pulsar -p install language-lua language-moonscript minimap language-docker   # I shouldn't assume you want these all
     ]],
@@ -70,7 +70,7 @@ return {
       cd ~/Downloads
       curl -O https://downloads.1password.com/linux/debian/amd64/stable/1password-latest.deb
       sudo dpkg -i 1password-latest.deb
-      sudo apt-get install -f
+      sudo apt-get install -fy
       rm 1password-latest.deb
     ]],
   },

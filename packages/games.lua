@@ -5,7 +5,7 @@ return {
     execute = [[
       curl -LO https://cdn.fastly.steamstatic.com/client/installer/steam.deb
       sudo dpkg -i steam.deb
-      sudo apt-get install -f
+      sudo apt-get install -fy
       rm steam.deb
     ]],
   },
@@ -15,7 +15,7 @@ return {
     execute = [[
       cd ~/Downloads
       sudo dpkg -i lutris*.deb
-      sudo apt-get install -f
+      sudo apt-get install -fy
       rm lutris*.deb
     ]],
   },
