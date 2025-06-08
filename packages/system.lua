@@ -52,9 +52,9 @@ return {
     execute = [[
       sudo apt-get install lua5.1 -y
       sudo apt-get install luarocks -y
-      sudo luarocks install moonscript   # I should not assume..
+      sudo luarocks install moonscript
     ]],
-    notes = "Might be able to do install in one step instead of two.",
+    notes = "Installing Luarocks will also install Moonscript.",
   },
   luajit = { description = "LuaJIT (Lua 5.1, faster)", apt = "luajit", ask = false, },
   ["purge-firefox"] = {
