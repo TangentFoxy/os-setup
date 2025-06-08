@@ -230,4 +230,12 @@ utility.deepcopy = function(tab)
   return copy
 end
 
+utility.enumerate = function(list)
+  local result = {}
+  for _, value in ipairs(list) do
+    result[value] = {}
+  end
+  return result
+end
+
 return utility
