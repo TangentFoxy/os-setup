@@ -1,5 +1,6 @@
 #!/usr/bin/env luajit
 
+local utility = require "lib.utility" -- this isn't an unused dependency (it adds functionality to string)
 local argparse = require "lib.argparse"
 
 local parser = argparse()
@@ -331,19 +332,18 @@ local packages = {
   ["periodic-cleanup-scripts"] = {
     prompt = "Do you want to install system cleanup scripts (to run once a week)",
     prerequisites = "uuidgen",
-    execute = [[
-      uuid=$(uuidgen)
-      cp ./user-cleanup.sh /opt/user-cleanup-$uuid.sh
-      croncmd="/opt/user-cleanup-$uuid.sh"
-      cronjob="* * * * 2 $croncmd"
-      (crontab -l | grep -v -F "$croncmd" || : ; echo "$cronjob" ) | crontab -
-      cp ./root-cleanup.sh /opt/root-cleanup-$uuid.sh
-      croncmd="/opt/root-cleanup-$uuid.sh"
-      cronjob="* * * * 1 $croncmd"
-      (sudo crontab -l | grep -v -F "$croncmd" || : ; echo "$cronjob" ) | sudo crontab -
-    ]],
+    cronjobs = {
+      "* * * * 2", "user-cleanup.sh", false,
+      "* * * * 1", "root-cleanup.sh", true,
+    },
   },
-  -- ["cpu-limiter"] = {},
+  ["cpu-limiter"] = {
+    description = "Do you want to limit max CPU usage to 65%", -- NOTE highly specific for my dying desktop :'D
+    prerequisites = "uuidgen",
+    cronjobs = {
+      "@reboot", "setcpu.sh 65", true,
+    },
+  },
 }
 
 local function prompt(text, hide_default_entry)
@@ -419,15 +419,24 @@ for name, package in pairs(packages) do
   if not package.condition then
     package.condition = {}
   end
+  if not package.cronjobs then
+    package.cronjobs = {}
+  end
 
   if package.execute and package.execute:sub(1, 1) ~= " " then -- pretty formatting for dry_run
     package.execute = "      " .. package.execute .. "\n"
   end
 
+  local function ERROR(reason)
+    error("Package '" .. name .. "' " .. reason .. ".\nPlease report this issue at https://github.com/TangentFoxy/os-setup/issues\n")
+  end
   if not package.prompt then
-    error("Package '" .. name .. "' lacks a prompt or description.\nPlease report this issue at https://github.com/TangentFoxy/os-setup/issues\n")
+    ERROR("lacks a prompt or description")
   end
   -- TODO check for other types of error
+  if #package.cronjobs % 3 ~= 0 then
+    ERROR("has invalid cronjob definition(s)")
+  end
 end
 
 -- choose what to run
@@ -485,6 +494,25 @@ local function create_menu_entry(desktop)
   execute("  desktop-file-validate " .. desktop_file_name)
   execute("  desktop-file-install --dir=$HOME/.local/share/applications " .. desktop_file_name)
   execute("  update-desktop-database ~/.local/share/applications") -- appears to be unnecessary on Mint
+  if options.dry_run then
+    io.write("\n")
+  end
+end
+
+local function create_cronjob(schedule, script, sudo)
+  local script_name = script:split(" ")[1]
+  local lines = {
+    "  uuid=$(uuidgen)",
+    "  cp ./scripts/" .. script_name .. " /opt/$uuid-" .. script_name,
+    "  croncmd=\"/opt/$uuid-" .. script .. "\"",
+    "  cronjob=\"" .. schedule .. " $croncmd\"",
+  }
+  if sudo then
+    lines[#lines + 1] = "  (sudo crontab -l | grep -v -F \"$croncmd\" || : ; echo \"$cronjob\" ) | sudo crontab -"
+  else
+    lines[#lines + 1] = "  (crontab -l | grep -v -F \"$croncmd\" || : ; echo \"$cronjob\" ) | crontab -"
+  end
+  execute(table.concat(lines, "\n"))
   if options.dry_run then
     io.write("\n")
   end
@@ -554,6 +582,13 @@ repeat
 
       if package.desktop then
         create_menu_entry(package.desktop)
+      end
+
+      for i = 1, #package.cronjobs, 3 do
+        local schedule = package.cronjobs[i]
+        local script = package.cronjobs[i + 1]
+        local sudo = package.cronjobs[i + 2]
+        create_cronjob(schedule, script, sudo)
       end
 
       package.status = states.INSTALLED
