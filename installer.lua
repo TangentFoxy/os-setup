@@ -338,11 +338,22 @@ local packages = {
     },
   },
   ["cpu-limiter"] = {
-    description = "Do you want to limit max CPU usage to 65%", -- NOTE highly specific for my dying desktop :'D
+    prompt = "Do you want to limit max CPU usage to 65%", -- NOTE highly specific for my dying desktop :'D
     prerequisites = "uuidgen",
     cronjobs = {
       "@reboot", "setcpu.sh 65", true,
     },
+  },
+  ["stunt-rally"] = {
+    description = "StuntRally (rally racing game)",
+    browse_to = "https://sourceforge.net/projects/stuntrally/files/latest/download",
+    execute = [[
+      cd ~/Downloads
+      mkdir -p ~/Applications/StuntRally
+      find . -name 'StuntRally*' -exec sudo tar -xf {} -C ./StuntRally \;
+      mv ./StuntRally*/StuntRally*/* ~/Applications/StuntRally/
+      rm -r ./StuntRally*
+    ]],
   },
 }
 
