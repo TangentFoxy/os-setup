@@ -27,6 +27,9 @@ local packages = {
       sudo apt-get autoclean
       sudo apt-get clean
       flatpak update
+      which -s brew && brew autoremove
+      which -s brew && brew cleanup --prune=all
+      which -s docker && docker system prune -all
     ]],
     ignore = true, -- NOTE maybe should be "autorun" or "internal" or something when enum is added
   },
@@ -168,7 +171,7 @@ local packages = {
   waydroid = {
     description = "Waydroid (Android-on-Wayland)",
     execute = [[
-      # sudo systemctl enable --now waydroid-container
+      # sudo systemctl enable --now waydroid-container   # this was supposed to work but didn't :D
       curl -s https://repo.waydro.id | sudo bash
       sudo apt-get update
       sudo apt-get install waydroid -y
@@ -235,6 +238,7 @@ local packages = {
     description = "Speech Note (speech-to-text notetaking)",
     flatpak = {"net.mkiol.SpeechNote", "net.mkiol.SpeechNote.Addon.nvidia", },
     notes = "Assumes you have an NVIDIA GPU.",
+    -- NOTE net.mkiol.SpeechNote.Addon.amd exists for AMD card support, but is not recommended (why?) https://github.com/mkiol/dsnote/issues/271
   },
   ["docker-nvidia"] = {
     description = "Docker NVIDIA support",
@@ -314,6 +318,32 @@ local packages = {
     execute = "ubuntu-drivers autoinstall", -- NOTE I think this needs sudo, but it hasn't errored when not using sudo so I'm confused
     notes = "Obviously, this should only be run on Ubuntu-derived systems.",
   },
+  ["disable-alt-click-drag"] = {
+    prompt = "Would you like to disable holding Alt to click and drag from anywhere on a window",
+    execute = "gsettings set org.cinnamon.desktop.wm.preferences mouse-button-modifier ''",
+    notes = "System Settings -> Preferences -> Windows -> Behavior -> Special key to move and resize windows.\n https://forums.linuxmint.com/viewtopic.php?t=319636",
+  },
+  ["uuidgen"] = {
+    description = "uuidgen (CLI UUID generator)",
+    apt = "uuid-runtime", -- probably already installed, but I'd rather just be certain
+    ask = false,
+  },
+  ["periodic-cleanup-scripts"] = {
+    prompt = "Do you want to install system cleanup scripts (to run once a week)",
+    prerequisites = "uuidgen",
+    execute = [[
+      uuid=$(uuidgen)
+      cp ./user-cleanup.sh /opt/user-cleanup-$uuid.sh
+      croncmd="/opt/user-cleanup-$uuid.sh"
+      cronjob="* * * * 2 $croncmd"
+      (crontab -l | grep -v -F "$croncmd" || : ; echo "$cronjob" ) | crontab -
+      cp ./root-cleanup.sh /opt/root-cleanup-$uuid.sh
+      croncmd="/opt/root-cleanup-$uuid.sh"
+      cronjob="* * * * 1 $croncmd"
+      (sudo crontab -l | grep -v -F "$croncmd" || : ; echo "$cronjob" ) | sudo crontab -
+    ]],
+  },
+  -- ["cpu-limiter"] = {},
 }
 
 local function prompt(text, hide_default_entry)
