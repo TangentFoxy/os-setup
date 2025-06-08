@@ -44,6 +44,6 @@ return {
       sudo apt-get update
       sudo apt-get install -y mpv
     ]],
-    -- TODO needs to be ignored on Mint?
+    notes = "Installing MPV seems to create errors despite successfully installing.",
   },
 }
