@@ -57,7 +57,7 @@ return {
     ignore = true,
   },
   qdirstat = { description = "QDirStat (fast disk usager analyzer)", apt = "qdirstat", },
-  ollama = { description = "Ollama (CLI tool for running local models)", execute = "curl -fsSL https://ollama.com/install.sh | sh", ask = false, },
+  ollama = { description = "Ollama (CLI tool for running local models)", execute = "curl -fsSL https://ollama.com/install.sh | sh", },
   dsnote = {
     description = "Speech Note (speech-to-text notetaking)",
     flatpak = {"net.mkiol.SpeechNote", "net.mkiol.SpeechNote.Addon.nvidia", },
