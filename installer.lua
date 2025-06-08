@@ -122,7 +122,6 @@ end
 
 
 
--- choose what to run
 local function ask_packages()
   for name, package in pairs(packages) do
     local function _ask(name, package)
@@ -151,7 +150,8 @@ local function ask_packages()
   io.write("\n") -- formatting
 end
 
-if options.package then
+-- choose what to run
+if #options.package > 0 then
   for _, name in pairs(options.package) do
     select_package(name)
   end
