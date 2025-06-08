@@ -38,6 +38,7 @@ return {
       rm Linux.pulsar*.deb
       pulsar -p install language-lua language-moonscript minimap language-docker   # I shouldn't assume you want these all
     ]],
+    notes = "Lua, Moonscript, and Dockerfile language support will be installed with Pulsar.\nAlso a minimap plugin! :o",
   },
   nextcloud = {
     description = "NextCloud (desktop sync app)", apt = "nextcloud-desktop",
