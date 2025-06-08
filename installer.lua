@@ -1,6 +1,6 @@
 #!/usr/bin/env luajit
 
-local argparse = require "argparse"
+local argparse = require "lib.argparse"
 
 local parser = argparse()
 -- parser:argument("package", "Select specific package(s)."):args("*")
