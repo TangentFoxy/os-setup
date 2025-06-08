@@ -1,6 +1,6 @@
 return {
   ["system-upgrade"] = {
-    -- this is just run automatically at the beginning and end of this script
+    -- this is run automatically at the beginning and end of the installer
     prompt = "Upgrade all packages",
     execute = [[
       which -s extrepo && sudo extrepo update
@@ -14,7 +14,7 @@ return {
       which -s brew && brew cleanup --prune=all
       which -s docker && docker system prune -all
     ]],
-    ignore = true, -- NOTE maybe should be "autorun" or "internal" or something when enum is added
+    ignore = true,
   },
   git = { apt = "git", description = "Git (version control)", ignore = true, }, -- has to be installed for this script to even be running...
   brew = {
@@ -131,7 +131,6 @@ return {
   ["disable-alt-click-drag"] = {
     prompt = "Would you like to disable holding Alt to click and drag from anywhere on a window",
     execute = "gsettings set org.cinnamon.desktop.wm.preferences mouse-button-modifier ''",
-    notes = "System Settings -> Preferences -> Windows -> Behavior -> Special key to move and resize windows.\n https://forums.linuxmint.com/viewtopic.php?t=319636",
   },
   ["uuidgen"] = {
     description = "uuidgen (CLI UUID generator)",
@@ -147,8 +146,9 @@ return {
     },
   },
   ["cpu-limiter"] = {
-    prompt = "Do you want to limit max CPU usage to 65%", -- NOTE highly specific for my dying desktop :'D
+    prompt = "Do you want to limit max CPU usage to 65%", -- highly specific for my dying desktop :'D
     prerequisites = "uuidgen",
+    execute = "./scripts/setcpu.sh 65",
     cronjobs = {
       "@reboot", "setcpu.sh 65", true,
     },
