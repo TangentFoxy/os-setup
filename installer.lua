@@ -126,6 +126,10 @@ for _, package in pairs(packages) do
       end
     end
 
+    if package.notes then
+      print(package.notes)
+    end
+
     if ask(package.prompt .. " (y/n, default: " .. options.default_choice .. ")? ") then
       package.status = states.TO_INSTALL
       for _, name in ipairs(package.prerequisites) do
