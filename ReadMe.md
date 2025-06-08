@@ -1,9 +1,11 @@
 # os-setup
 Scripts to make setting up a new system easier.. hopefully.
 
-**Note: Currently hardcoded to do a dry-run demo only.**  
-Once I finish testing that it works as intended and fixing the arguments that
-can be passed to installer.lua, I will add info here and remove this warning.
+**Note: Please take a look at the issues before running.**  
+Most things are working fine, and I am working hard to fix the remaining
+problems, but please take a look at what could go wrong before you run this.
+
+More documentation coming soon!
 
 To use, run the following:
 
