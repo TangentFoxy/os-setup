@@ -152,7 +152,9 @@ local packages = {
   ["purge-firefox"] = {
     prompt = "Do you want to purge Firefox",
     execute = "sudo apt-get purge firefox -y",
-    prerequisites = "librewolf", -- TEMP it just needs to know SOME browser is installed (see #13)
+    condition = function()
+      return require("lib.browser_count")() > 1 -- need at least 2 browsers installed before removing 1
+    end,
   },
   steam = {
     description = "Steam (video game platform)",
@@ -335,6 +337,7 @@ end
 
 local function system_upgrade()
   if options.dry_run then
+    print("Making sure system is up-to-date...")
     print(packages["system-upgrade"].execute)
   else
     os.execute(packages["system-upgrade"].execute)
@@ -366,6 +369,7 @@ for name, package in pairs(packages) do
   if package.description then
     package.prompt = "Install " .. package.description
   end
+
   if type(package.prerequisites) == "string" then
     package.prerequisites = { package.prerequisites }
   end
@@ -375,9 +379,17 @@ for name, package in pairs(packages) do
   if type(package.flatpak) == "string" then
     package.flatpak = { package.flatpak }
   end
+  if type(package.condition) ~= "table" then
+    package.condition = { package.condition }
+  end
+
   if not package.prerequisites then
     package.prerequisites = {}
   end
+  if not package.condition then
+    package.condition = {}
+  end
+
   if package.execute and package.execute:sub(1, 1) ~= " " then -- pretty formatting for dry_run
     package.execute = "      " .. package.execute .. "\n"
   end
@@ -449,7 +461,17 @@ local function create_menu_entry(desktop)
 end
 
 local done = false
+local times_run = 0
 repeat
+  if times_run > #packages + 10 then
+    print("The following packages have failed to install:")
+    for name, package in pairs(packages) do
+      if package.status == states.TO_INSTALL then
+        print("  " .. name)
+      end
+    end
+    error("This script was detected to be looping infinitely.")
+  end
 
   for name, package in pairs(packages) do
     local function _install(name, package)
@@ -459,6 +481,14 @@ repeat
 
       for _, name in ipairs(package.prerequisites) do
         if packages[name].status ~= states.INSTALLED then
+          return
+        end
+      end
+
+      for _, condition in ipairs(package.condition) do
+        -- NOTE can lead to an infinite loop! (perhaps we should count number of failures,
+        --   and exit if it gets larger than the number of packages - something that could only happen if it is truly an infinite loop)
+        if not condition() then
           return
         end
       end
@@ -510,6 +540,7 @@ repeat
     end
   end
 
+  times_run = times_run + 1
 until done
 
 system_upgrade()
