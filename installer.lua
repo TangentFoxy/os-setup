@@ -232,8 +232,14 @@ repeat
       end
 
       if package.browse_to then
+        local file_description = "Debian (.deb)"
+        if type(package.browse_to) == "table" then
+          file_description = package.browse_to[2]
+          package.browse_to = package.browse_to[1]
+        end
+
         print("Opening your browser to a download page.")
-        print("Make sure you choose the Debian (.deb) file and that it is saved to ~/Downloads")
+        print("Make sure you choose the " .. file_description .. " file and that it is saved to ~/Downloads")
         execute("  open " .. package.browse_to)
         prompt("Press enter when the download is finished.", true)
       end

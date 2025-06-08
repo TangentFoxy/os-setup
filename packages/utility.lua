@@ -10,7 +10,7 @@ return {
   },
   pia = {
     description = "Private Internet Access (cheap, secure VPN)",
-    browse_to = "https://www.privateinternetaccess.com/download/linux-vpn",
+    browse_to = { "https://www.privateinternetaccess.com/download/linux-vpn", ".run (there is only one option)", },
     execute = [[
       cd ~/Downloads
       sudo chmod +x ./pia*.run

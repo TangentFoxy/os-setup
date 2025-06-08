@@ -11,7 +11,7 @@ return {
   },
   lutris = {
     description = "Lutris (video game preservation platform)",
-    browse_to = "https://github.com/lutris/lutris/releases",
+    browse_to = { "https://github.com/lutris/lutris/releases", "generic binaries (xz/lzma archive)" },
     execute = [[
       cd ~/Downloads
       sudo dpkg -i lutris*.deb
@@ -40,7 +40,7 @@ return {
   },
   ["stunt-rally"] = {
     description = "StuntRally (rally racing game)",
-    browse_to = "https://sourceforge.net/projects/stuntrally/files/latest/download",
+    browse_to = { "https://sourceforge.net/projects/stuntrally/files/latest/download", ".txz (should automatically start)" },
     execute = [[
       cd ~/Downloads
       mkdir -p ~/Applications/StuntRally
