@@ -70,6 +70,13 @@ return {
       sudo journalctl --vacuum-time=1d
       sudo journalctl --vacuum-size=10M
     ]],
+    ignore = true, -- deprecated
+  },
+  ["cleanup-logs"] = {
+    prompt = "Install a script to automatically remove most logs",
+    cronjobs = {
+      "* * * * 1", "logs-cleanup.sh", true,
+    },
   },
   ["git-credentials-insecure"] = {
     prompt = "Configure Git to store credentials in plaintext\n  (this is a bad and insecure idea!)",
