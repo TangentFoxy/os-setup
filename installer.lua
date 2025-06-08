@@ -4,7 +4,7 @@ local utility = require "lib.utility"
 local argparse = require "lib.argparse"
 
 local parser = argparse()
--- parser:argument("package", "Select specific package(s)."):args("*")
+parser:argument("package", "Select specific package(s). If specified, --default-choice and --interactive options will be ignored."):args("*")
 parser:option("--default-choice", "Default answer to prompts.", "N"):choices{"Y", "N"}:args(1):overwrite(false)
 parser:flag("--dry-run", "Output the commands that would be run instead of running them."):overwrite(false)
 parser:option("--interactive", "Wait for user input.", "true"):choices{"true", "false"}:overwrite(false)
@@ -23,6 +23,17 @@ for _, name in ipairs({ "system", "games", "media", "utility", }) do
   local _packages = require("packages." .. name)
   for name, package in pairs(_packages) do
     packages[name] = package
+  end
+end
+
+local states = utility.enumerate({ "IGNORED", "TO_ASK", "TO_INSTALL", "INSTALLED", })
+
+local select_package
+select_package = function(name)
+  local package = packages[name]
+  package.status = states.TO_INSTALL
+  for _, name in ipairs(package.prerequisites) do
+    select_package(name)
   end
 end
 
@@ -57,8 +68,6 @@ end
 -- TODO there needs to be a way to avoid asking about things when a previous quesiton already answered it
 --   ie if docker was asked but not selected, the prompts that have it as a prerequisite should not be asked!
 --   I'll reuse ignore for this?
-
-local states = utility.enumerate({ "IGNORED", "TO_ASK", "TO_INSTALL", "INSTALLED", })
 
 -- sanitize formatting variations (and check for errors)
 for name, package in pairs(packages) do
@@ -114,34 +123,41 @@ end
 
 
 -- choose what to run
-for _, package in pairs(packages) do
-  local function _ask(package)
-    if not (package.status == states.TO_ASK) then
-      return
-    end
-
-    for _, name in ipairs(package.prerequisites) do
-      if packages[name].status == states.IGNORED then
+local function ask_packages()
+  for name, package in pairs(packages) do
+    local function _ask(name, package)
+      if not (package.status == states.TO_ASK) then
         return
       end
-    end
 
-    if package.notes then
-      print(package.notes)
-    end
-
-    if ask(package.prompt .. " (y/n, default: " .. options.default_choice .. ")? ") then
-      package.status = states.TO_INSTALL
       for _, name in ipairs(package.prerequisites) do
-        packages[name].status = states.TO_INSTALL
+        if packages[name].status == states.IGNORED then
+          return
+        end
+      end
+
+      if package.notes then
+        print(package.notes)
+      end
+
+      if ask(package.prompt .. " (y/n, default: " .. options.default_choice .. ")? ") then
+        select_package(name)
       end
     end
+
+    _ask(name, package)
   end
 
-  _ask(package)
+  io.write("\n") -- formatting
 end
 
-io.write("\n") -- formatting
+if options.package then
+  for _, name in pairs(options.package) do
+    select_package(name)
+  end
+else
+  ask_packages()
+end
 
 system_upgrade()
 
