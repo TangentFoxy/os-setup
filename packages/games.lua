@@ -31,9 +31,9 @@ return {
     ]],
     desktop = { -- never use special characters here D:
       name = "OpenTTD",
-      path = "~/Applications/OpenTTD",
-      exec = "~/Applications/OpenTTD/openttd",
-      icon = "~/Applications/OpenTTD/share/icons/hicolor/256x256/apps/openttd.png",
+      path = "$HOME/Applications/OpenTTD",
+      exec = "$HOME/Applications/OpenTTD/openttd",
+      icon = "$HOME/Applications/OpenTTD/share/icons/hicolor/256x256/apps/openttd.png",
       categories = {"Game", "StrategyGame"},
     },
     ignore = true,
