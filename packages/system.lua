@@ -16,7 +16,7 @@ return {
     ]],
     ignore = true,
   },
-  git = { apt = "git", description = "Git (version control)", ignore = true, }, -- has to be installed for this script to even be running...
+  git = { apt = "git", description = "Git (version control)", ask = false, }, -- has to be installed for this script to even be running...
   brew = {
     description = "Brew (user-space package manager, originally for macOS)",
     prerequisites = "git",
