@@ -25,8 +25,8 @@ return {
     execute = [[
       cd ~/Downloads
       mkdir -p ~/Applications/OpenTTD
-      find . -name 'openttd*' -exec sudo tar -xf {} -C ~/Applications/OpenTTD \;
-      # mv ./openttd*/* ~/Applications/OpenTTD/
+      find . -name 'openttd*' -exec tar -xf {} -C . \;
+      mv ./openttd*/* ~/Applications/OpenTTD/
       rm -r ./openttd*
     ]],
     desktop = { -- never use special characters here D:
