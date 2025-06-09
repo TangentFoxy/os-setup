@@ -22,6 +22,7 @@ return {
     description = "Telegram Desktop (messenger)",
     browse_to = { "https://telegram.org/dl/desktop/linux", ".tar.xz (it should have automatically started)", },
     execute = [[
+      cd ~/Downloads
       # curl -O https://telegram.org/dl/desktop/linux
       find . -name 'tsetup*' -exec sudo tar -xf {} -C /opt \;
       rm ./tsetup*
