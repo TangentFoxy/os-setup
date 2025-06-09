@@ -153,4 +153,8 @@ return {
       "@reboot", "setcpu.sh 65", true,
     },
   },
+  ["latest-mesa-drivers"] = {
+    prompt = "Are you using Intel integrated graphics OR in a VirtualBox machine (an updated driver must be manually installed to prevent graphics driver failure)",
+    ppa = "ppa:kisak/kisak-mesa", execute = "sudo apt-get upgrade -y",
+  },
 }
