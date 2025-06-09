@@ -20,8 +20,9 @@ return {
   },
   telegram = {
     description = "Telegram Desktop (messenger)",
+    browse_to = { "https://telegram.org/dl/desktop/linux", ".tar.xz (it should have automatically started)", },
     execute = [[
-      curl -O https://telegram.org/dl/desktop/linux
+      # curl -O https://telegram.org/dl/desktop/linux
       find . -name 'tsetup*' -exec sudo tar -xf {} -C /opt \;
       rm ./tsetup*
       /opt/Telegram/Telegram   # it adds itself to the menu when launched
