@@ -93,6 +93,11 @@ for name, package in pairs(packages) do
   if type(package.condition) ~= "table" then
     package.condition = { package.condition }
   end
+  if package.desktop then
+    if type(package.desktop.categories) == "string" then
+      package.desktop.categories = { package.desktop.categories }
+    end
+  end
 
   if not package.prerequisites then
     package.prerequisites = {}
