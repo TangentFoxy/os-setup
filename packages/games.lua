@@ -34,20 +34,25 @@ return {
       path = "$HOME/Applications/OpenTTD",
       exec = "$HOME/Applications/OpenTTD/openttd",
       icon = "$HOME/Applications/OpenTTD/share/icons/hicolor/256x256/apps/openttd.png",
-      categories = {"Game", "StrategyGame"},
+      categories = { "Game", "StrategyGame", },
     },
-    ignore = true,
   },
   ["stunt-rally"] = {
     description = "StuntRally (rally racing game)",
     browse_to = { "https://sourceforge.net/projects/stuntrally/files/latest/download", ".txz (should automatically start)" },
     execute = [[
       cd ~/Downloads
-      mkdir -p ~/Applications/StuntRally
-      find . -name 'StuntRally*' -exec sudo tar -xf {} -C ./StuntRally \;
-      mv ./StuntRally*/StuntRally*/* ~/Applications/StuntRally/
+      mkdir -p ~/Applications
+      find . -name 'StuntRally*' -exec tar -xf {} -C ~/Applications \;
+      mv ~/Applications/StuntRally* ~/Applications/StuntRally
       rm -r ./StuntRally*
     ]],
-    ignore = true,
+    desktop = {
+      name = "StuntRally",
+      path = "$HOME/Applications/StuntRally/bin/Release",
+      exec = "$HOME/Applications/StuntRally/bin/Release/stuntrally3",
+      icon = "$HOME/Applications/StuntRally/data/gui/stuntrally.png",
+      categories = { "Game", "Simulation", },
+    },
   },
 }
