@@ -68,9 +68,10 @@ local function system_upgrade()
   end
 end
 
--- TODO there needs to be a way to avoid asking about things when a previous quesiton already answered it
---   ie if docker was asked but not selected, the prompts that have it as a prerequisite should not be asked!
---   I'll reuse ignore for this?
+local original_error = error
+function error(message)
+  original_error("\n\n" .. message .. "\n\n")
+end
 
 local function sanitize_packages() -- and check for errors
   for name, package in pairs(packages) do
@@ -123,15 +124,15 @@ local function sanitize_packages() -- and check for errors
       package.execute = "      " .. package.execute .. "\n"
     end
 
-    local function ERROR(reason)
-      error("Package '" .. name .. "' " .. reason .. ".\nPlease report this issue at https://github.com/TangentFoxy/os-setup/issues\n")
+    local function config_error(reason)
+      error("Package '" .. name .. "' " .. reason .. ".\nPlease report this issue at https://github.com/TangentFoxy/os-setup/issues")
     end
     if not package.prompt then
-      ERROR("lacks a prompt or description")
+      config_error("lacks a prompt or description")
     end
     -- TODO check for other types of error
     if #package.cronjobs % 3 ~= 0 then
-      ERROR("has invalid cronjob definition(s)")
+      config_error("has invalid cronjob definition(s)")
     end
   end
 end
