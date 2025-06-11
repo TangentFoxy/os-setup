@@ -4,6 +4,7 @@
 package.path = (arg[0]:match("@?(.*/)") or arg[0]:match("@?(.*\\)")) .. "?.lua;" .. package.path
 local utility = require "lib.utility"
 local argparse = require "lib.argparse"
+local is_browser_installed = require "lib.is_browser_installed"
 
 local parser = argparse()
 parser:argument("package", "Select specific package(s). If specified, --default-choice and --interactive options will be ignored."):args("*")
@@ -263,6 +264,14 @@ repeat
           end
         end
       end
+
+      if package.browse_to then
+        if not is_browser_installed() then
+          return
+        end
+      end
+
+
 
       if options.dry_run then
         print("Simulating '" .. name .. "'...")
