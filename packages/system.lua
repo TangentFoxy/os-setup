@@ -60,9 +60,7 @@ return {
   ["purge-firefox"] = {
     prompt = "Do you want to purge Firefox",
     execute = "sudo apt-get purge firefox -y",
-    condition = function()
-      return require("lib.browser_count")() > 1 -- need at least 2 browsers installed before removing 1
-    end,
+    condition = "which firefox",
   },
   ["reduce-logs"] = {
     prompt = "Reduce stored logs to 1 day / 10 MB",

@@ -1,5 +1,7 @@
 #!/usr/bin/env luajit
 
+-- ensures functionality if you've run this from somewhere else while its in $PATH
+package.path = (arg[0]:match("@?(.*/)") or arg[0]:match("@?(.*\\)")) .. "?.lua;" .. package.path
 local utility = require "lib.utility"
 local argparse = require "lib.argparse"
 
@@ -81,6 +83,10 @@ for name, package in pairs(packages) do
     package.prompt = "Install " .. package.description
   end
 
+  if package.condition then
+    package.conditions = package.condition
+  end
+
   if type(package.prerequisites) == "string" then
     package.prerequisites = { package.prerequisites }
   end
@@ -90,15 +96,18 @@ for name, package in pairs(packages) do
   if type(package.flatpak) == "string" then
     package.flatpak = { package.flatpak }
   end
-  if type(package.condition) ~= "table" then
-    package.condition = { package.condition }
+  if type(package.conditions) ~= "table" then
+    package.conditions = { package.conditions }
+  end
+  if type(package.browse_to) == "string" then
+    package.browse_to = { package.browse_to, "Debian (.deb)" }
   end
 
   if not package.prerequisites then
     package.prerequisites = {}
   end
-  if not package.condition then
-    package.condition = {}
+  if not package.conditions then
+    package.conditions = {}
   end
   if not package.cronjobs then
     package.cronjobs = {}
@@ -163,7 +172,8 @@ system_upgrade()
 
 local function execute(...)
   if options.dry_run then
-    return print(...)
+    print(...)
+    return 0 -- always say it worked
   else
     return os.execute(...)
   end
@@ -237,9 +247,15 @@ repeat
         end
       end
 
-      for _, condition in ipairs(package.condition) do
-        if not condition() then
-          return
+      for _, condition in ipairs(package.conditions) do
+        if type(condition) == "function" then
+          if not condition() then
+            return
+          end
+        elseif type(condition) == "string" then
+          if not execute(condition) == 0 then
+            return
+          end
         end
       end
 
@@ -248,15 +264,12 @@ repeat
       end
 
       if package.browse_to then
-        local file_description = "Debian (.deb)"
-        if type(package.browse_to) == "table" then
-          file_description = package.browse_to[2]
-          package.browse_to = package.browse_to[1]
-        end
+        local download_url = package.browse_to[1]
+        local file_description = package.browse_to[2]
 
         print("Opening your browser to a download page.")
         print("Make sure you choose the " .. file_description .. " file and that it is saved to ~/Downloads")
-        execute("  open " .. package.browse_to)
+        execute("  open " .. download_url)
         prompt("Press enter when the download is finished.", true)
       end
 
