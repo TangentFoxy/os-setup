@@ -11,6 +11,7 @@ parser:argument("package", "Select specific package(s). If specified, --default-
 parser:option("--default-choice", "Default answer to prompts.", "N"):choices{"Y", "N"}:args(1):overwrite(false)
 parser:flag("--dry-run", "Output the commands that would be run instead of running them."):overwrite(false)
 parser:option("--interactive", "Wait for user input.", "true"):choices{"true", "false"}:overwrite(false)
+parser:flag("--show-priority", "List all packages ordered by priority."):overwrite(false)
 
 local options = parser:parse()
 
@@ -21,6 +22,14 @@ end
 
 
 
+local original_error = error
+function error(message)
+  original_error("\n\n" .. message .. "\n\n")
+end
+
+
+
+-- TODO reorganize into a load_packages() function to call immediately
 local packages = {}
 for _, name in ipairs({ "system", "games", "media", "utility", }) do
   local _packages = require("packages." .. name)
@@ -30,48 +39,6 @@ for _, name in ipairs({ "system", "games", "media", "utility", }) do
 end
 
 local states = utility.enumerate({ "IGNORED", "TO_ASK", "TO_INSTALL", "INSTALLED", })
-
-local select_package
-select_package = function(name)
-  local package = packages[name]
-  package.status = states.TO_INSTALL
-  for _, name in ipairs(package.prerequisites) do
-    select_package(name)
-  end
-end
-
-local function prompt(text, hide_default_entry)
-  io.write(text)
-  if options.interactive then
-    return io.read("*line")
-  else
-    if not hide_default_entry then io.write(options.default_choice) end
-    io.write("\n")
-    return ""
-  end
-end
-
-local function ask(text)
-  local choice = prompt(text)
-  if #choice < 1 then choice = options.default_choice end
-  if choice:sub(1):lower() == "y" then
-    return true
-  end
-end
-
-local function system_upgrade()
-  if options.dry_run then
-    print("Making sure system is up-to-date...")
-    print(packages["system-upgrade"].execute)
-  else
-    os.execute(packages["system-upgrade"].execute)
-  end
-end
-
-local original_error = error
-function error(message)
-  original_error("\n\n" .. message .. "\n\n")
-end
 
 local function sanitize_packages() -- and check for errors
   for name, package in pairs(packages) do
@@ -84,9 +51,11 @@ local function sanitize_packages() -- and check for errors
     if package.description then
       package.prompt = "Install " .. package.description
     end
-
     if package.condition then
       package.conditions = package.condition
+    end
+    if not package.priority then
+      package.priority = 0
     end
 
     if type(package.prerequisites) == "string" then
@@ -138,6 +107,63 @@ local function sanitize_packages() -- and check for errors
 end
 sanitize_packages()
 
+local package_order = {}
+for name, package in pairs(packages) do
+  table.insert(package_order, {
+    name = name,
+    priority = package.priority,
+  })
+end
+table.sort(package_order, function(a, b) return a.priority > b.priority end)
+
+
+
+if options.show_priority then
+  for _, package in ipairs(package_order) do
+    print(package.priority, package.name)
+  end
+  return true
+end
+
+
+
+local select_package
+select_package = function(name)
+  local package = packages[name]
+  package.status = states.TO_INSTALL
+  for _, name in ipairs(package.prerequisites) do
+    select_package(name)
+  end
+end
+
+local function prompt(text, hide_default_entry)
+  io.write(text)
+  if options.interactive then
+    return io.read("*line")
+  else
+    if not hide_default_entry then io.write(options.default_choice) end
+    io.write("\n")
+    return ""
+  end
+end
+
+local function ask(text)
+  local choice = prompt(text)
+  if #choice < 1 then choice = options.default_choice end
+  if choice:sub(1):lower() == "y" then
+    return true
+  end
+end
+
+local function system_upgrade()
+  if options.dry_run then
+    print("Making sure system is up-to-date...")
+    print(packages["system-upgrade"].execute)
+  else
+    os.execute(packages["system-upgrade"].execute)
+  end
+end
+
 
 
 local function ask_packages()
@@ -154,7 +180,7 @@ local function ask_packages()
       end
 
       if package.notes then
-        print(package.notes)
+        print("\n" .. package.notes)
       end
 
       if ask(package.prompt .. " (y/n, default: " .. options.default_choice .. ")? ") then
@@ -244,84 +270,84 @@ repeat
     error("This script was detected to be looping infinitely.")
   end
 
-  for name, package in pairs(packages) do
-    local function _install(name, package)
-      if package.status ~= states.TO_INSTALL then
-        return
-      end
-
-      for _, name in ipairs(package.prerequisites) do
-        if packages[name].status ~= states.INSTALLED then
-          return
-        end
-      end
-
-      for _, condition in ipairs(package.conditions) do
-        if type(condition) == "function" then
-          if not condition() then
-            return
-          end
-        elseif type(condition) == "string" then
-          if not execute(condition) == 0 then
-            return
-          end
-        end
-      end
-
-      if package.browse_to then
-        if not is_browser_installed() then
-          return
-        end
-      end
-
-
-
-      if options.dry_run then
-        print("Simulating '" .. name .. "'...")
-      end
-
-      if package.browse_to then
-        local download_url = package.browse_to[1]
-        local file_description = package.browse_to[2]
-
-        print("Opening your browser to a download page.")
-        print("Make sure you choose the " .. file_description .. " file and that it is saved to ~/Downloads")
-        execute("  open " .. download_url)
-        prompt("Press enter when the download is finished.", true)
-      end
-
-      if package.ppa then
-        execute("  sudo add-apt-repository -y " .. package.ppa .. " && sudo apt-get update")
-      end
-      if package.apt then
-        execute("  sudo apt-get install -y " .. table.concat(package.apt, " "))
-      end
-      if package.flatpak then
-        for _, name in ipairs(package.flatpak) do
-          execute("  flatpak install -y " .. name)
-        end
-      end
-
-      if package.execute then
-        execute(package.execute)
-      elseif options.dry_run then
-        io.write("\n")
-      end
-
-      if package.desktop then
-        create_menu_entry(package.desktop)
-      end
-
-      for i = 1, #package.cronjobs, 3 do
-        local schedule = package.cronjobs[i]
-        local script = package.cronjobs[i + 1]
-        local sudo = package.cronjobs[i + 2]
-        create_cronjob(schedule, script, sudo)
-      end
-
-      package.status = states.INSTALLED
+  local function _install(name, package)
+    if package.status ~= states.TO_INSTALL then
+      return
     end
 
+    for _, name in ipairs(package.prerequisites) do
+      if packages[name].status ~= states.INSTALLED then
+        return
+      end
+    end
+
+    for _, condition in ipairs(package.conditions) do
+      if type(condition) == "function" then
+        if not condition() then
+          return
+        end
+      elseif type(condition) == "string" then
+        if not execute(condition) == 0 then
+          return
+        end
+      end
+    end
+
+    if package.browse_to then
+      if not is_browser_installed() then
+        return
+      end
+    end
+
+
+
+    if options.dry_run then
+      print("Simulating '" .. name .. "'...")
+    end
+
+    if package.browse_to then
+      local download_url = package.browse_to[1]
+      local file_description = package.browse_to[2]
+
+      print("Opening your browser to a download page.")
+      print("Make sure you choose the " .. file_description .. " file and that it is saved to ~/Downloads")
+      execute("  open " .. download_url)
+      prompt("Press enter when the download is finished.", true)
+    end
+
+    if package.ppa then
+      execute("  sudo add-apt-repository -y " .. package.ppa .. " && sudo apt-get update")
+    end
+    if package.apt then
+      execute("  sudo apt-get install -y " .. table.concat(package.apt, " "))
+    end
+    if package.flatpak then
+      for _, name in ipairs(package.flatpak) do
+        execute("  flatpak install -y " .. name)
+      end
+    end
+
+    if package.execute then
+      execute(package.execute)
+    elseif options.dry_run then
+      io.write("\n")
+    end
+
+    if package.desktop then
+      create_menu_entry(package.desktop)
+    end
+
+    for i = 1, #package.cronjobs, 3 do
+      local schedule = package.cronjobs[i]
+      local script = package.cronjobs[i + 1]
+      local sudo = package.cronjobs[i + 2]
+      create_cronjob(schedule, script, sudo)
+    end
+
+    package.status = states.INSTALLED
+  end
+
+  for name, package in pairs(packages) do
     _install(name, package)
   end
 

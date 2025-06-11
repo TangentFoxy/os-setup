@@ -150,6 +150,7 @@ return {
     cronjobs = {
       "@reboot", "setcpu.sh 65", true,
     },
+    priority = 1000,
   },
   ["latest-mesa-drivers"] = {
     prompt = "Are you using Intel integrated graphics OR in a VirtualBox machine (an updated driver must be manually installed to prevent graphics driver failure)",

@@ -7,6 +7,7 @@ return {
       sudo apt-get update
       sudo apt-get install librewolf -y
     ]],
+    priority = 100,
   },
   pia = {
     description = "Private Internet Access (cheap, secure VPN)",
