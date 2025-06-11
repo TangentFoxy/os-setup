@@ -102,6 +102,11 @@ for name, package in pairs(packages) do
   if type(package.browse_to) == "string" then
     package.browse_to = { package.browse_to, "Debian (.deb)" }
   end
+  if package.desktop then
+    if type(package.desktop.categories) == "string" then
+      package.desktop.categories = { package.desktop.categories }
+    end
+  end
 
   if not package.prerequisites then
     package.prerequisites = {}
