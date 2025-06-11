@@ -72,68 +72,70 @@ end
 --   ie if docker was asked but not selected, the prompts that have it as a prerequisite should not be asked!
 --   I'll reuse ignore for this?
 
--- sanitize formatting variations (and check for errors)
-for name, package in pairs(packages) do
-  if package.ask or package.ask == nil then
-    package.status = states.TO_ASK
-  end
-  if package.ignore then
-    package.status = states.IGNORED
-  end
-  if package.description then
-    package.prompt = "Install " .. package.description
-  end
+local function sanitize_packages() -- and check for errors
+  for name, package in pairs(packages) do
+    if package.ask or package.ask == nil then
+      package.status = states.TO_ASK
+    end
+    if package.ignore then
+      package.status = states.IGNORED
+    end
+    if package.description then
+      package.prompt = "Install " .. package.description
+    end
 
-  if package.condition then
-    package.conditions = package.condition
-  end
+    if package.condition then
+      package.conditions = package.condition
+    end
 
-  if type(package.prerequisites) == "string" then
-    package.prerequisites = { package.prerequisites }
-  end
-  if type(package.apt) == "string" then
-    package.apt = { package.apt }
-  end
-  if type(package.flatpak) == "string" then
-    package.flatpak = { package.flatpak }
-  end
-  if type(package.conditions) ~= "table" then
-    package.conditions = { package.conditions }
-  end
-  if type(package.browse_to) == "string" then
-    package.browse_to = { package.browse_to, "Debian (.deb)" }
-  end
-  if package.desktop then
-    if type(package.desktop.categories) == "string" then
-      package.desktop.categories = { package.desktop.categories }
+    if type(package.prerequisites) == "string" then
+      package.prerequisites = { package.prerequisites }
+    end
+    if type(package.apt) == "string" then
+      package.apt = { package.apt }
+    end
+    if type(package.flatpak) == "string" then
+      package.flatpak = { package.flatpak }
+    end
+    if type(package.conditions) ~= "table" then
+      package.conditions = { package.conditions }
+    end
+    if type(package.browse_to) == "string" then
+      package.browse_to = { package.browse_to, "Debian (.deb)" }
+    end
+    if package.desktop then
+      if type(package.desktop.categories) == "string" then
+        package.desktop.categories = { package.desktop.categories }
+      end
+    end
+
+    if not package.prerequisites then
+      package.prerequisites = {}
+    end
+    if not package.conditions then
+      package.conditions = {}
+    end
+    if not package.cronjobs then
+      package.cronjobs = {}
+    end
+
+    if package.execute and package.execute:sub(1, 1) ~= " " then -- pretty formatting for dry_run
+      package.execute = "      " .. package.execute .. "\n"
+    end
+
+    local function ERROR(reason)
+      error("Package '" .. name .. "' " .. reason .. ".\nPlease report this issue at https://github.com/TangentFoxy/os-setup/issues\n")
+    end
+    if not package.prompt then
+      ERROR("lacks a prompt or description")
+    end
+    -- TODO check for other types of error
+    if #package.cronjobs % 3 ~= 0 then
+      ERROR("has invalid cronjob definition(s)")
     end
   end
-
-  if not package.prerequisites then
-    package.prerequisites = {}
-  end
-  if not package.conditions then
-    package.conditions = {}
-  end
-  if not package.cronjobs then
-    package.cronjobs = {}
-  end
-
-  if package.execute and package.execute:sub(1, 1) ~= " " then -- pretty formatting for dry_run
-    package.execute = "      " .. package.execute .. "\n"
-  end
-
-  local function ERROR(reason)
-    error("Package '" .. name .. "' " .. reason .. ".\nPlease report this issue at https://github.com/TangentFoxy/os-setup/issues\n")
-  end
-  if not package.prompt then
-    ERROR("lacks a prompt or description")
-  end
-  -- TODO check for other types of error
-  if #package.cronjobs % 3 ~= 0 then
-    ERROR("has invalid cronjob definition(s)")
-  end
 end
+sanitize_packages()
 
 
 
