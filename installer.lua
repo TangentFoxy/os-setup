@@ -25,7 +25,7 @@ end
 
 -- TODO reorganize into a load_packages() function to call immediately
 local packages = {}
-for _, name in ipairs({ "system", "games", "media", "utility", }) do
+for _, name in ipairs({ "system", "games", "media", "utility", "developer", }) do
   local _packages = require("packages." .. name)
   for name, package in pairs(_packages) do
     packages[name] = package

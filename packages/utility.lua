@@ -32,19 +32,6 @@ return {
     ]],
     priority = -1,
   },
-  pulsar = {
-    description = "Pulsar (code editor, fork of Atom)",
-    browse_to = "https://pulsar-edit.dev/download.html#regular-releases",
-    execute = [[
-      cd ~/Downloads
-      sudo dpkg -i Linux.pulsar*.deb
-      sudo apt-get install -fy
-      rm Linux.pulsar*.deb
-      pulsar -p install language-lua language-moonscript minimap language-docker   # I shouldn't assume you want these all
-    ]],
-    notes = "Lua, Moonscript, and Dockerfile language support will be installed with Pulsar.\nAlso a minimap plugin! :o",
-    priority = -10,
-  },
   nextcloud = {
     description = "NextCloud (desktop sync app)", apt = "nextcloud-desktop",
     notes = "NextCloud's sync dialog upon initially connecting to a server works badly.\n Set up your connection without file sync, then add it from the app.",
@@ -68,7 +55,8 @@ return {
     flatpak = {"net.mkiol.SpeechNote", "net.mkiol.SpeechNote.Addon.nvidia", },
     notes = "Assumes you have an NVIDIA GPU.",
     priority = -101,
-    -- NOTE net.mkiol.SpeechNote.Addon.amd exists for AMD card support, but is not recommended (why?) https://github.com/mkiol/dsnote/issues/271
+    -- TODO split into the correct versions based on NVIDIA or AMD support
+    -- NOTE net.mkiol.SpeechNote.Addon.amd exists for AMD card support, but is not recommended *right now* https://github.com/mkiol/dsnote/issues/271
   },
   ["1password"] = {
     description = "1password (password manager & passkey)",

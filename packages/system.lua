@@ -16,7 +16,6 @@ return {
     ]],
     ignore = true,
   },
-  git = { apt = "git", description = "Git (version control)", ask = false, priority = 200, }, -- has to be installed for this script to even be running...
   brew = {
     description = "Brew (user-space package manager, originally for macOS)",
     prerequisites = "git",
@@ -82,22 +81,6 @@ return {
       "* * * * 1", "logs-cleanup.sh", true,
     },
     priority = 1,
-  },
-  ["git-credentials-insecure"] = {
-    prompt = "Configure Git to store credentials in plaintext\n  (this is a bad and insecure idea!)",
-    prerequisites = "git",
-    execute = "git config --global credential.helper store",
-    ignore = true,
-  },
-  ["git-credentials-libsecret"] = {
-    prompt = "Configure Git to store credentials securely (using libsecret)",
-    prerequisites = {"git", "import-private-config"}, -- NOTE the second prerequisite here should be optional
-    execute = [[
-      sudo apt install libsecret-1-0 libsecret-1-dev libglib2.0-dev
-      sudo make --directory=/usr/share/doc/git/contrib/credential/libsecret
-      git config --global credential.helper /usr/share/doc/git/contrib/credential/libsecret/git-credential-libsecret
-    ]],
-    priority = 9,
   },
   ["import-private-config"] = {
     prompt = "Would you like to run a private config import script",
