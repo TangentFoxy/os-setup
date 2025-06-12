@@ -13,13 +13,6 @@ parser:flag("--dry-run", "Output the commands that would be run instead of runni
 parser:option("--interactive", "Wait for user input.", "true"):choices{"true", "false"}:overwrite(false)
 parser:flag("--show-priority", "List all packages ordered by priority."):overwrite(false)
 
-local options = parser:parse()
-
-if options.interactive == "false" then
-  options.interactive = false
-  -- don't need to bother converting "true" to true because its truthy
-end
-
 
 
 local original_error = error
@@ -118,6 +111,13 @@ table.sort(package_order, function(a, b) return a.priority > b.priority end)
 
 
 
+local options = parser:parse()
+
+if options.interactive == "false" then
+  options.interactive = false
+  -- don't need to bother converting "true" to true because its truthy
+end
+
 if options.show_priority then
   for _, package in ipairs(package_order) do
     print(package.priority, package.name)
@@ -167,7 +167,10 @@ end
 
 
 local function ask_packages()
-  for name, package in pairs(packages) do
+  for _, package in ipairs(package_order) do
+    local name = package.name
+    package = packages[name]
+
     local function _ask(name, package)
       if not (package.status == states.TO_ASK) then
         return
@@ -196,7 +199,7 @@ end
 
 -- choose what to run
 if #options.package > 0 then
-  for _, name in pairs(options.package) do
+  for _, name in ipairs(options.package) do
     select_package(name)
   end
 else
@@ -347,7 +350,10 @@ repeat
     package.status = states.INSTALLED
   end
 
-  for name, package in pairs(packages) do
+  for _, package in ipairs(package_order) do
+    local name = package.name
+    package = packages[name]
+
     _install(name, package)
   end
 

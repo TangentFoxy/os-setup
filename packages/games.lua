@@ -36,6 +36,7 @@ return {
       icon = "$HOME/Applications/OpenTTD/share/icons/hicolor/256x256/apps/openttd.png",
       categories = { "Game", "StrategyGame", },
     },
+    priority = -1,
   },
   ["stunt-rally"] = {
     description = "StuntRally (rally racing game)",
@@ -54,5 +55,6 @@ return {
       icon = "$HOME/Applications/StuntRally/data/gui/stuntrally.png",
       categories = { "Game", "Simulation", },
     },
+    priority = -150,
   },
 }

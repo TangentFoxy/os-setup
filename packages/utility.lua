@@ -7,7 +7,7 @@ return {
       sudo apt-get update
       sudo apt-get install librewolf -y
     ]],
-    priority = 100,
+    priority = 110,
   },
   pia = {
     description = "Private Internet Access (cheap, secure VPN)",
@@ -18,6 +18,7 @@ return {
       ./pia*.run
       rm ./pia*.run
     ]],
+    priority = 1,
   },
   telegram = {
     description = "Telegram Desktop (messenger)",
@@ -29,6 +30,7 @@ return {
       rm ./tsetup*
       /opt/Telegram/Telegram   # it adds itself to the menu when launched
     ]],
+    priority = -1,
   },
   pulsar = {
     description = "Pulsar (code editor, fork of Atom)",
@@ -41,12 +43,13 @@ return {
       pulsar -p install language-lua language-moonscript minimap language-docker   # I shouldn't assume you want these all
     ]],
     notes = "Lua, Moonscript, and Dockerfile language support will be installed with Pulsar.\nAlso a minimap plugin! :o",
+    priority = -10,
   },
   nextcloud = {
     description = "NextCloud (desktop sync app)", apt = "nextcloud-desktop",
     notes = "NextCloud's sync dialog upon initially connecting to a server works badly.\n Set up your connection without file sync, then add it from the app.",
   },
-  keepass = { description = "KeePassXC (password manager)", apt = "keepassxc", },
+  keepass = { description = "KeePassXC (password manager)", apt = "keepassxc", priority = 2, },
   waydroid = {
     description = "Waydroid (Android-on-Wayland)",
     execute = [[
@@ -64,6 +67,7 @@ return {
     description = "Speech Note (speech-to-text notetaking)",
     flatpak = {"net.mkiol.SpeechNote", "net.mkiol.SpeechNote.Addon.nvidia", },
     notes = "Assumes you have an NVIDIA GPU.",
+    priority = -101,
     -- NOTE net.mkiol.SpeechNote.Addon.amd exists for AMD card support, but is not recommended (why?) https://github.com/mkiol/dsnote/issues/271
   },
   ["1password"] = {
@@ -75,6 +79,7 @@ return {
       sudo apt-get install -fy
       rm 1password-latest.deb
     ]],
+    priority = 2,
   },
   ["virtualbox-7.1"] = {
     description = "VirtualBox 7.1 (OS virtualizer)",
@@ -92,9 +97,9 @@ return {
       sudo vboxmanage extpack install Oracle_VirtualBox_Extension_Pack-7.1.4.vbox-extpack --accept-license=eb31505e56e9b4d0fbca139104da41ac6f6b98f8e78968bdf01b1f3da3c4f9ae
       rm ./Oracle_VirtualBox_Extension_Pack*.vbox-extpack
     ]],
-    ignore = true,
+    priority = -1, ignore = true,
   },
   virtualbox = {
-    description = "VirtualBox (OS virtualizer)", apt = "virtualbox", ignore = true, -- NOTE will probably favor this in the future?
+    description = "VirtualBox (OS virtualizer)", apt = "virtualbox", ignore = true, priority = -1, -- NOTE will probably favor this in the future?
   },
 }

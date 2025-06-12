@@ -16,7 +16,7 @@ return {
     ]],
     ignore = true,
   },
-  git = { apt = "git", description = "Git (version control)", ask = false, }, -- has to be installed for this script to even be running...
+  git = { apt = "git", description = "Git (version control)", ask = false, priority = 200, }, -- has to be installed for this script to even be running...
   brew = {
     description = "Brew (user-space package manager, originally for macOS)",
     prerequisites = "git",
@@ -28,24 +28,28 @@ return {
       sudo apt-get install build-essential -y
       brew install gcc
     ]],
+    priority = 150,
   },
   docker = {
-    description = "Docker (containers!)",
+    description = "Docker (containers!)", priority = 99,
     apt = "docker.io", execute = "sudo usermod -aG docker $USER",
   },
   ["docker-compose-legacy"] = {
     description = "docker-compose (Python script, legacy)",
     prerequisites = "docker",
     apt = { "python3-setuptools", "docker-compose", },
+    priority = 1,
   },
   ["docker-compose"] = {
     description = "docker compose (Docker plugin)",
     prerequisites = "docker",
     apt = "docker-compose-v2",
+    priority = 2,
   },
   extrepo = {
     description = "extrepo (makes it easy to manage external repositories)",
     ask = false, apt = "extrepo",
+    priority = 200,
   },
   luarocks = {
     description = "Luarocks (Lua package manager)",
@@ -55,8 +59,9 @@ return {
       sudo luarocks install moonscript
     ]],
     notes = "Installing Luarocks will also install Moonscript.",
+    priority = -1,
   },
-  luajit = { description = "LuaJIT (Lua 5.1, faster)", apt = "luajit", ask = false, },
+  luajit = { description = "LuaJIT (Lua 5.1, faster)", apt = "luajit", ask = false, priority = 750, },
   ["purge-firefox"] = {
     prompt = "Do you want to purge Firefox",
     execute = "sudo apt-get purge firefox -y",
@@ -68,13 +73,15 @@ return {
       sudo journalctl --vacuum-time=1d
       sudo journalctl --vacuum-size=10M
     ]],
-    ignore = true, -- deprecated
+    ignore = true,     -- deprecated
+    priority = -99999, -- works best at the end
   },
   ["cleanup-logs"] = {
     prompt = "Install a script to automatically remove most logs",
     cronjobs = {
       "* * * * 1", "logs-cleanup.sh", true,
     },
+    priority = 1,
   },
   ["git-credentials-insecure"] = {
     prompt = "Configure Git to store credentials in plaintext\n  (this is a bad and insecure idea!)",
@@ -90,6 +97,7 @@ return {
       sudo make --directory=/usr/share/doc/git/contrib/credential/libsecret
       git config --global credential.helper /usr/share/doc/git/contrib/credential/libsecret/git-credential-libsecret
     ]],
+    priority = 9,
   },
   ["import-private-config"] = {
     prompt = "Would you like to run a private config import script",
@@ -102,10 +110,12 @@ return {
       rm ./import-private-config.lua
       # git config --global init.defaultBranch main   # I shouldn't need this soon hopefully..
     ]],
+    priority = 99,
   },
   ["unattended-upgrades"] = {
     prompt = "Would you like automatic background security updates",
     apt = "unattended-upgrades",
+    priority = -999, -- probably better to avoid potential automatic conflict by doing this too early
   },
   ["docker-nvidia"] = {
     description = "Docker NVIDIA support",
@@ -119,21 +129,25 @@ return {
       sudo nvidia-ctk runtime configure --runtime=docker
       sudo systemctl restart docker
     ]],
+    priority = -5,
   },
   ["ubuntu-drivers"] = {
     description = "ubuntu-drivers autoinstall (will find and install missing drivers)",
     apt = "ubuntu-drivers-common",
     execute = "ubuntu-drivers autoinstall", -- NOTE I think this needs sudo, but it hasn't errored when not using sudo so I'm confused
     notes = "Obviously, this should only be run on Ubuntu-derived systems.",
+    priority = 950, -- do sooner so that if errors interrupt the script, you aren't in a broken state
   },
   ["disable-alt-click-drag"] = {
     prompt = "Would you like to disable holding Alt to click and drag from anywhere on a window",
     execute = "gsettings set org.cinnamon.desktop.wm.preferences mouse-button-modifier ''",
+    priority = 1,
   },
   ["uuidgen"] = {
     description = "uuidgen (CLI UUID generator)",
     apt = "uuid-runtime", -- probably already installed, but I'd rather just be certain
     ask = false,
+    priority = 100,
   },
   ["periodic-cleanup-scripts"] = {
     prompt = "Do you want to install system cleanup scripts (to run once a week)",
@@ -142,6 +156,7 @@ return {
       "* * * * 2", "user-cleanup.sh", false,
       "* * * * 1", "root-cleanup.sh", true,
     },
+    priority = 5,
   },
   ["cpu-limiter"] = {
     prompt = "Do you want to limit max CPU usage to 65%", -- highly specific for my dying desktop :'D
@@ -150,10 +165,11 @@ return {
     cronjobs = {
       "@reboot", "setcpu.sh 65", true,
     },
-    priority = 1000,
+    priority = 9999,
   },
   ["latest-mesa-drivers"] = {
-    prompt = "Are you using Intel integrated graphics OR in a VirtualBox machine (an updated driver must be manually installed to prevent graphics driver failure)",
+    prompt = "Are you using Intel integrated graphics OR in a VirtualBox machine\n (an updated driver must be manually installed to prevent graphics driver failure)",
     ppa = "ppa:kisak/kisak-mesa", execute = "sudo apt-get upgrade -y",
+    priority = 999,
   },
 }
