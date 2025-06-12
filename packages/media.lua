@@ -25,4 +25,14 @@ return {
     notes = "Installing MPV seems to create errors despite successfully installing.",
   },
   ["ffmpeg"] = { description = "FFMPEG (CLI video encoder)", apt = "ffmpeg", },
+  pandoc = {
+    description = "Pandoc (document conversion tool)",
+    browse_to = "https://github.com/jgm/pandoc/releases/latest",
+    execute = [[
+      cd ~/Downloads
+      sudo dpkg -i pandoc*.deb
+      sudo apt-get install -fy
+      rm pandoc*.deb
+    ]],
+  },
 }
