@@ -28,5 +28,4 @@ return {
     execute = "brew install --cask android-platform-tools",
     prerequisites = "brew",
   },
-  ["ffmpeg"] = { description = "FFMPEG (CLI video encoder)", apt = "ffmpeg", },
 }

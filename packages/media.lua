@@ -24,4 +24,5 @@ return {
     ]],
     notes = "Installing MPV seems to create errors despite successfully installing.",
   },
+  ["ffmpeg"] = { description = "FFMPEG (CLI video encoder)", apt = "ffmpeg", },
 }
