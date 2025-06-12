@@ -12,7 +12,7 @@ return {
       flatpak update
       which -s brew && brew autoremove
       which -s brew && brew cleanup --prune=all
-      which -s docker && docker system prune --all -f
+      which -s docker && sudo docker system prune --all -f   # sudo because we assume the user hasn't started a new session after being added to docker group
     ]],
     ignore = true,
   },
