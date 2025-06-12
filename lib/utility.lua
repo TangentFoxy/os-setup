@@ -26,11 +26,29 @@ else
   }
 end
 
-utility.path = arg[0]:match("@?(.*/)") or arg[0]:match("@?(.*\\)") -- inspired by discussion in https://stackoverflow.com/q/6380820
+utility.version = "1.1.0"
+-- WARNING: This will return "./" if the original script is called locally instead of with an absolute path!
+utility.path = (arg[0]:match("@?(.*/)") or arg[0]:match("@?(.*\\)")) -- inspired by discussion in https://stackoverflow.com/q/6380820
 
--- TODO replace with a version that can handle bad installs..
 utility.require = function(...)
+  -- if libraries adjacent to this one aren't already loadable, make sure they are!
+  if not package.path:find(utility.path, 1, true) then
+    package.path = utility.path .. "?.lua;" .. package.path
+  end
   return require(...)
+end
+
+-- errors if specified program isn't in the path
+local _required_program_cache = {}
+utility.required_program = function(name)
+  if _required_program_cache[name] then
+    return true
+  end
+  if os.execute(utility.commands.which .. tostring(name)) == 0 then
+    _required_program_cache[name] = true
+  else
+    error("\n\n" .. tostring(name) .. " must be installed and in the path\n")
+  end
 end
 
 
@@ -57,7 +75,8 @@ function utility.capture_safe(command, get_status)
   return output
 end
 
-function utility.capture(command)
+-- can hang indefinitely; not always available
+function utility.capture_unsafe(command)
   if io.popen then
     local file = assert(io.popen(command, 'r'))
     local output = assert(file:read('*all'))
@@ -68,6 +87,8 @@ function utility.capture(command)
     return utility.capture_safe(command)
   end
 end
+
+utility.capture = utility.capture_safe
 
 
 
@@ -101,14 +122,6 @@ function string.split(s, delimiter)
 end
 
 
-
--- errors if specified program isn't in the path
--- TODO verify this works on Linux / macOS
-utility.required_program = function(name)
-  if os.execute(utility.commands.which .. tostring(name)) ~= 0 then
-    error("\n\n" .. tostring(name) .. " must be installed and in the path\n")
-  end
-end
 
 -- modified from my fork of lume
 utility.uuid = function()
@@ -157,7 +170,7 @@ utility.open = function(file_name, mode)
   end
 end
 
--- run a function based on each file name in a directory
+-- run a function on each file name in a directory
 --   example list items: utility.ls(".")(print)
 utility.ls = function(path)
   local command = utility.commands.list
@@ -192,7 +205,7 @@ local config
 utility.get_config = function()
   if not config then
     local config_path = utility.path .. "config.json"
-    if utility.exists(config_path) then
+    if utility.file_exists(config_path) then
       utility.open(config_path, "r")(function(config_file)
         local json = utility.require("json")
         config = json.decode(config_file:read("*all"))
@@ -215,6 +228,8 @@ utility.save_config = function()
   end
 end
 
+
+
 utility.deepcopy = function(tab)
   local _type = type(tab)
   local copy
@@ -236,6 +251,22 @@ utility.enumerate = function(list)
     result[value] = {}
   end
   return result
+end
+
+-- a super common need I'm encountering is wanting content from a URL without side effects
+utility.curl_read = function(download_url, curl_options)
+  utility.required_program("curl")
+  local tmp_file_name = utility.tmp_file_name()
+  local command = "curl "
+  if curl_options then
+    command = command .. curl_options .. " "
+  end
+  os.execute(command .. download_url:enquote() .. " > " .. tmp_file_name)
+  local file_contents
+  utility.open(tmp_file_name, "r", "Could not download " .. download_url:enquote())(function(file)
+    file_contents = file:read("*all")
+  end)
+  return file_contents
 end
 
 return utility
