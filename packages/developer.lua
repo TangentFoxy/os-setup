@@ -28,4 +28,22 @@ return {
     execute = "brew install --cask android-platform-tools",
     prerequisites = "brew",
   },
+  ["fire-tools"] = {
+    description = "Fire Tools (small GUI program to improve Amazon Fire tablets)",
+    apt = { "python3-pip", "python3.12-venv", "python3-tk", },
+    execute = [[
+      curl -LO https://github.com/mrhaydendp/fire-tools/releases/latest/download/Fire-Tools.zip
+      unzip Fire-Tools.zip && rm Fire-Tools.zip
+      cd Fire-Tools
+      python3 -m venv .venv
+      source .venv/bin/activate
+      python3 -m pip install -r requirements.txt
+      echo source .venv/bin/activate > run.sh
+      echo python3 main.py >> run.sh
+      chmod +x run.sh
+      mv run.sh "Run Fire Tools.sh"
+    ]],
+    prerequisites = "android-platform-tools",
+    notes = "While out-of-date, the website has useful information:\n https://blog.mrhaydendp.com/projects/fire-tools/",
+  },
 }
