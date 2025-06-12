@@ -94,7 +94,7 @@ return {
   },
   ["docker-nvidia"] = {
     description = "Docker NVIDIA support",
-    prerequisites = "docker",
+    prerequisites = "docker", hardware = "NVIDIA",
     execute = [[
       curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
         && curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
@@ -145,6 +145,6 @@ return {
   ["latest-mesa-drivers"] = {
     prompt = "Are you using Intel integrated graphics OR in a VirtualBox machine\n (an updated driver must be manually installed to prevent graphics driver failure)",
     ppa = "ppa:kisak/kisak-mesa", execute = "sudo apt-get upgrade -y",
-    priority = 999,
+    priority = 999, hardware = "integrated_graphics",
   },
 }

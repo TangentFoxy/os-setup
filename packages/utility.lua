@@ -52,11 +52,19 @@ return {
   ollama = { description = "Ollama (CLI tool for running local models)", execute = "curl -fsSL https://ollama.com/install.sh | sh", },
   dsnote = {
     description = "Speech Note (speech-to-text notetaking)",
-    flatpak = {"net.mkiol.SpeechNote", "net.mkiol.SpeechNote.Addon.nvidia", },
-    notes = "Assumes you have an NVIDIA GPU.",
+    flatpak = "net.mkiol.SpeechNote",
     priority = -101,
-    -- TODO split into the correct versions based on NVIDIA or AMD support
-    -- NOTE net.mkiol.SpeechNote.Addon.amd exists for AMD card support, but is not recommended *right now* https://github.com/mkiol/dsnote/issues/271
+  },
+  ["dsnote-nvidia"] = {
+    description = "Speech Note NVIDIA accelerator",
+    prerequisites = "dsnote", hardware = "NVIDIA",
+    flatpak = "net.mkiol.SpeechNote.Addon.nvidia",
+  },
+  ["dsnote-amd"] = {
+    notes = "AMD support is not recommended right now due to its large size and limited utility,\n but in the near future may be recommended. See https://github.com/mkiol/dsnote/issues/271 for details.",
+    description = "Speech Note AMD accelerator",
+    prerequisites = "dsnote", hardware = "AMD",
+    flatpak = "net.mkiol.SpeechNote.Addon.amd",
   },
   ["1password"] = {
     description = "1password (password manager & passkey)",

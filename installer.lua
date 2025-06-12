@@ -35,12 +35,19 @@ end
 local states = utility.enumerate({ "IGNORED", "TO_ASK", "TO_INSTALL", "INSTALLED", })
 
 local function sanitize_packages() -- and check for errors
+  local detected_hardware = require "lib.detected_hardware"
+
   for name, package in pairs(packages) do
     if package.ask or package.ask == nil then
       package.status = states.TO_ASK
     end
     if package.ignore then
       package.status = states.IGNORED
+    end
+    if package.hardware then
+      if not detected_hardware[package.hardware] then
+        package.status = states.IGNORED
+      end
     end
     if package.description then
       package.prompt = "Install " .. package.description
