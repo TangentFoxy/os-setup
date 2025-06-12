@@ -11,7 +11,7 @@ return {
   },
   lutris = {
     description = "Lutris (video game preservation platform)",
-    browse_to = { "https://github.com/lutris/lutris/releases", "generic binaries (xz/lzma archive)" },
+    browse_to = "https://github.com/lutris/lutris/releases",
     execute = [[
       cd ~/Downloads
       sudo dpkg -i lutris*.deb
@@ -21,7 +21,7 @@ return {
   },
   openttd = {
     description = "Open Transport Tycoon Deluxe (transport strategy game)",
-    browse_to = "https://www.openttd.org/downloads/openttd-releases/latest",
+    browse_to = { "https://www.openttd.org/downloads/openttd-releases/latest", "generic binaries (xz/lzma archive)", },
     execute = [[
       cd ~/Downloads
       mkdir -p ~/Applications/OpenTTD
