@@ -66,21 +66,13 @@ return {
     execute = "sudo apt-get purge firefox -y",
     condition = "which firefox",
   },
-  ["reduce-logs"] = {
-    prompt = "Reduce stored logs to 1 day / 10 MB",
-    execute = [[
-      sudo journalctl --vacuum-time=1d
-      sudo journalctl --vacuum-size=10M
-    ]],
-    ignore = true,     -- deprecated
-    priority = -99999, -- works best at the end
-  },
   ["cleanup-logs"] = {
-    prompt = "Install a script to automatically remove most logs",
+    prompt = "Install a script to automatically remove most logs weekly",
+    execute = "./scripts/logs-cleanup.sh",
     cronjobs = {
       "* * * * 1", "logs-cleanup.sh", true,
     },
-    priority = 1,
+    priority = -99999, -- runs at the end because it also runs immediately once
   },
   ["import-private-config"] = {
     prompt = "Would you like to run a private config import script",
