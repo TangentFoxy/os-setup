@@ -23,4 +23,9 @@ return {
     notes = "Lua, Moonscript, and Dockerfile language support will be installed with Pulsar.\nAlso a minimap plugin! :o",
     priority = -10,
   },
+  ["android-platform-tools"] = {
+    description = "ADB Tools (for interfacing with Android devices)",
+    execute = "brew install --cask android-platform-tools",
+    prerequisites = "brew",
+  },
 }
