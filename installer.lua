@@ -55,6 +55,9 @@ local function sanitize_packages() -- and check for errors
     if type(package.prerequisites) == "string" then
       package.prerequisites = { package.prerequisites }
     end
+    if type(package.optional_prerequisites) == "string" then
+      package.optional_prerequisites = { package.optional_prerequisites }
+    end
     if type(package.apt) == "string" then
       package.apt = { package.apt }
     end
@@ -75,6 +78,9 @@ local function sanitize_packages() -- and check for errors
 
     if not package.prerequisites then
       package.prerequisites = {}
+    end
+    if not package.optional_prerequisites then
+      package.optional_prerequisites = {}
     end
     if not package.conditions then
       package.conditions = {}
@@ -295,6 +301,11 @@ repeat
 
     for _, name in ipairs(package.prerequisites) do
       if packages[name].status ~= states.INSTALLED then
+        return
+      end
+    end
+    for _, name in ipairs(package.optional_prerequisites) do
+      if packages[name].status ~= states.TO_INSTALL then
         return
       end
     end

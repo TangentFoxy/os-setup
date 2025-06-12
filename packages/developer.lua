@@ -2,7 +2,8 @@ return {
   git = { apt = "git", description = "Git (version control)", ask = false, priority = 200, }, -- has to be installed for this script to even be running...
   ["git-credentials-libsecret"] = {
     prompt = "Configure Git to store credentials securely (using libsecret)",
-    prerequisites = {"git", "import-private-config"}, -- NOTE the second prerequisite here should be optional
+    prerequisites = "git",
+    optional_prerequisites = "import-private-config",
     execute = [[
       sudo apt install libsecret-1-0 libsecret-1-dev libglib2.0-dev
       sudo make --directory=/usr/share/doc/git/contrib/credential/libsecret
