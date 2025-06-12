@@ -12,6 +12,7 @@ parser:option("--default-choice", "Default answer to prompts.", "N"):choices{"Y"
 parser:flag("--dry-run", "Output the commands that would be run instead of running them."):overwrite(false)
 parser:option("--interactive", "Wait for user input.", "true"):choices{"true", "false"}:overwrite(false)
 parser:flag("--show-priority", "List all packages ordered by priority."):overwrite(false)
+parser:flag("--list-packages", "List all packages (presented as a Markdown task list)."):overwrite(false)
 
 
 
@@ -121,6 +122,20 @@ end
 if options.show_priority then
   for _, package in ipairs(package_order) do
     print(package.priority, package.name)
+  end
+  return true
+end
+
+if options.list_packages then
+  for _, package in ipairs(package_order) do
+    local output = "- [ ] " .. package.name
+    if packages[package.name].ignore then
+      output = output .. " (ignored)"
+    end
+    if packages[package.name].ask == false then
+      output = output .. " (not prompted: dependency only)"
+    end
+    print(output)
   end
   return true
 end
