@@ -99,4 +99,8 @@ return {
     description = "VirtualBox (OS virtualizer)", apt = "virtualbox",
     ignore = true, priority = -1, hardware_exclude = "virtual_machine", -- NOTE will probably favor this in the future?
   },
+  solaar = {
+    description = "Solaar (UI for managing Logitech wireless peripherals)", apt = "solaar",
+    notes = "Solaar configures itself to autostart by default.",
+  },
 }
