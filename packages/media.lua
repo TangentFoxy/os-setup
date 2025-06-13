@@ -35,4 +35,9 @@ return {
       rm pandoc*.deb
     ]],
   },
+  ["yt-dlp"] = {
+    description = "YT-DLP (a CLI media download tool)",
+    prerequisites = "brew",
+    execute = "brew install yt-dlp",
+  },
 }
