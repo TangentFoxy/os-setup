@@ -93,9 +93,10 @@ return {
       sudo vboxmanage extpack install Oracle_VirtualBox_Extension_Pack-7.1.4.vbox-extpack --accept-license=eb31505e56e9b4d0fbca139104da41ac6f6b98f8e78968bdf01b1f3da3c4f9ae
       rm ./Oracle_VirtualBox_Extension_Pack*.vbox-extpack
     ]],
-    priority = -1, ignore = true,
+    priority = -1, ignore = true, hardware_exclude = "virtual_machine",
   },
   virtualbox = {
-    description = "VirtualBox (OS virtualizer)", apt = "virtualbox", ignore = true, priority = -1, -- NOTE will probably favor this in the future?
+    description = "VirtualBox (OS virtualizer)", apt = "virtualbox",
+    ignore = true, priority = -1, hardware_exclude = "virtual_machine", -- NOTE will probably favor this in the future?
   },
 }

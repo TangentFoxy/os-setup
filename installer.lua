@@ -49,6 +49,11 @@ local function sanitize_packages() -- and check for errors
         package.status = states.IGNORED
       end
     end
+    if package.hardware_exclude then
+      if detected_hardware[package.hardware_exclude] then
+        package.status = states.IGNORED
+      end
+    end
     if package.description then
       package.prompt = "Install " .. package.description
     end
