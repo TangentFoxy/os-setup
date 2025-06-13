@@ -19,11 +19,13 @@ return {
       sudo dpkg -i Linux.pulsar*.deb
       sudo apt-get install -fy
       rm Linux.pulsar*.deb
-      pulsar -p install language-lua language-moonscript minimap language-docker   # I shouldn't assume you want these all
     ]],
-    notes = "Lua, Moonscript, and Dockerfile language support will be installed with Pulsar.\nAlso a minimap plugin! :o",
     priority = -10,
   },
+  ["pulsar-minimap"] = { description = "minimap for Pulsar", prerequisites = "pulsar", execute = "pulsar -p install minimap", },
+  ["pulsar-language-lua"] = { description = "language-lua for Pulsar", prerequisites = "pulsar", execute = "pulsar -p install language-lua", },
+  ["pulsar-language-moonscript"] = { description = "language-moonscript for Pulsar", prerequisites = "pulsar", execute = "pulsar -p install language-moonscript", },
+  ["pulsar-language-docker"] = { description = "language-docker for Pulsar", prerequisites = "pulsar", execute = "pulsar -p install language-docker", },
   ["android-platform-tools"] = {
     description = "ADB Tools (for interfacing with Android devices)",
     execute = "brew install --cask android-platform-tools",
