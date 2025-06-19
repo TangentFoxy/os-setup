@@ -147,4 +147,5 @@ return {
     ppa = "ppa:kisak/kisak-mesa", execute = "sudo apt-get upgrade -y",
     priority = 999, hardware = "integrated_graphics",
   },
+  gparted = { description = "GParted (graphical partition manager)", apt = "gparted", },
 }
