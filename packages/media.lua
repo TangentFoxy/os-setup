@@ -40,4 +40,5 @@ return {
     prerequisites = "brew",
     execute = "brew install yt-dlp",
   },
+  audacity = { description = "Audacity (audio editor)", prerequisites = "ffmpeg", ppa = "ppa:ubuntuhandbook1/audacity", apt = "audacity", },
 }
