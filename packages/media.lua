@@ -42,4 +42,13 @@ return {
   },
   audacity = { description = "Audacity (audio editor)", prerequisites = "ffmpeg", ppa = "ppa:ubuntuhandbook1/audacity", apt = "audacity", },
   ["musicbrainz-picard"] = { description = "MusicBrainz Picard (extensive audio tagging software)", apt = "picard", },
+  imagemagick7 = {
+    description = "ImageMagick 7 (CLI image editing tools)", -- prerequisites = "curl", -- everything is assuming curl is installed...
+    execute = [[
+      cd ~/Downloads
+      curl -LO https://imagemagick.org/archive/binaries/magick
+      chmod +x ./magick
+      sudo mv ./magick /usr/local/bin/
+    ]],
+  },
 }
