@@ -103,4 +103,16 @@ return {
     description = "Solaar (UI for managing Logitech wireless peripherals)", apt = "solaar",
     notes = "Solaar configures itself to autostart by default.",
   },
+  ["tangent-lua-scripts"] = {
+    description = "Tangent's Lua Scripts (random misc things)",
+    prerequisites = { "ollama", "git", "luajit", "curl", "yt-dlp", "chromium", "ffmpeg", "pandoc", "luarocks-luafilesystem", }, -- last dependency is optional!
+    execute = [[
+      mkdir -p ~/Applications
+      cd ~/Applications
+      git clone https://github.com/TangentFoxy/lua-scripts --depth=1
+      cd lua-scripts
+      echo Adding lua-scripts to path. A warning will now appear:
+      ./add_to_path.sh
+    ]],
+  },
 }
