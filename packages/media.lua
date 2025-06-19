@@ -41,4 +41,5 @@ return {
     execute = "brew install yt-dlp",
   },
   audacity = { description = "Audacity (audio editor)", prerequisites = "ffmpeg", ppa = "ppa:ubuntuhandbook1/audacity", apt = "audacity", },
+  ["musicbrainz-picard"] = { description = "MusicBrainz Picard (extensive audio tagging software)", apt = "picard", },
 }
