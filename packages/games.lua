@@ -57,4 +57,5 @@ return {
     },
     priority = -150,
   },
+  love2d = { description = "Love2D (Lua-based game engine)", ppa = "ppa:bartbes/love-stable", apt = "love", priority = 2, },
 }
