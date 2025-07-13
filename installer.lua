@@ -37,7 +37,30 @@ local states = utility.enumerate({ "IGNORED", "TO_ASK", "TO_INSTALL", "INSTALLED
 local function sanitize_packages() -- and check for errors
   local detected_hardware = require "lib.detected_hardware"
 
+  local function config_error(reason)
+    error("Package '" .. name .. "' " .. reason .. ".\nPlease report this issue at https://github.com/TangentFoxy/os-setup/issues")
+  end
+
   for name, package in pairs(packages) do
+    if type(package.prerequisites) == "string" then
+      package.prerequisites = { package.prerequisites }
+    end
+    if type(package.optional_prerequisites) == "string" then
+      package.optional_prerequisites = { package.optional_prerequisites }
+    end
+    for _, pkg in ipairs(package.prerequisites) do
+      if not packages[pkg] then
+        print("WARNING: " .. name:enquote() .. " lists nonexistant dependency " .. pkg:enquote() .. " and will be ignored.")
+        package.ignore = true
+        -- break   -- no, so ALL unmet dependencies are warned against
+      end
+    end
+    for _, pkg in ipairs(package.optional_prerequisites) do
+      if not packages[pkg] then
+        print("WARNING: " .. name:enquote() .. " lists nonexistant optional dependency " .. pkg:enquote() .. ".")
+      end
+    end
+
     if package.ask or package.ask == nil then
       package.status = states.TO_ASK
     end
@@ -55,7 +78,7 @@ local function sanitize_packages() -- and check for errors
       end
     end
     if package.description then
-      if package.prompt then error("Packages cannot have a prompt if they have a description. " .. name:enquote() .. " has both defined.") end
+      if package.prompt then config_error("has a prompt and a description (incompatible)") end
       package.prompt = "Install " .. package.description
     end
     if package.condition then
@@ -65,12 +88,6 @@ local function sanitize_packages() -- and check for errors
       package.priority = 0
     end
 
-    if type(package.prerequisites) == "string" then
-      package.prerequisites = { package.prerequisites }
-    end
-    if type(package.optional_prerequisites) == "string" then
-      package.optional_prerequisites = { package.optional_prerequisites }
-    end
     if type(package.apt) == "string" then
       package.apt = { package.apt }
     end
@@ -109,9 +126,6 @@ local function sanitize_packages() -- and check for errors
       package.execute = "      " .. package.execute .. "\n"
     end
 
-    local function config_error(reason)
-      error("Package '" .. name .. "' " .. reason .. ".\nPlease report this issue at https://github.com/TangentFoxy/os-setup/issues")
-    end
     if not package.prompt then
       config_error("lacks a prompt or description")
     end
