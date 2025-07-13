@@ -36,7 +36,7 @@ Metadata:
 Functions that will be run (in the order shown here):
 - `prerequisites`: Package(s) required to be installed *before* this package.
 - `optional_prerequisites`: Package(s) that must be installed *before* this package if both are being installed.
-- `conditions`/`condition`: Can be a function, which must return a truthy value for installation to proceed, or a command which must exit 0 to continue. (Used to make complex checks that can't be handled another way.)
+- `conditions`/`condition`: Can be a function, which must return a truthy value for installation to proceed, or a command which must exit 0 to continue. Critically, these checks are done during an attempted install, *not* when deciding what to install. (Used to make complex checks that can't be handled another way.)
 - `browse_to`: Tuples of URLs and file descriptions that must be opened for the user to download file(s). Defaults to instructing to download a Debian (.deb) file.
 - `ppa`: A PPA that must be added to APT.
 - `apt`: Packages that must be installed via APT-GET.

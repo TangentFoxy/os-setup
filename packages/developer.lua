@@ -26,6 +26,10 @@ return {
   ["pulsar-language-lua"] = { description = "language-lua for Pulsar", prerequisites = "pulsar", execute = "pulsar -p install language-lua", },
   ["pulsar-language-moonscript"] = { description = "language-moonscript for Pulsar", prerequisites = "pulsar", execute = "pulsar -p install language-moonscript", },
   ["pulsar-language-docker"] = { description = "language-docker for Pulsar", prerequisites = "pulsar", execute = "pulsar -p install language-docker", },
+  ["pulsar-complete"] = {
+    description = "Pulsar (code editor, fork of Atom) + several useful plugins",
+    prerequisites = { "pulsar", "pulsar-minimap", "pulsar-language-lua", "pulsar-language-moonscript", "pulsar-language-docker", },
+  },
   ["android-platform-tools"] = {
     description = "ADB Tools (for interfacing with Android devices)",
     brew = "--cask android-platform-tools",
@@ -51,4 +55,8 @@ return {
   },
   ["luarocks-moonscript"] = { description = "moonscript from Luarocks", prerequisites = "luarocks", execute = "sudo luarocks install moonscript", },
   ["luarocks-luafilesystem"] = { description = "LuaFileSystem from Luarocks", prerequisites = "luarocks", execute = "sudo luarocks install luafilesystem", },
+  ["luarocks-complete"] = {
+    description = "Luarocks (Lua package manager) + several useful Lua libraries",
+    prerequisites = { "luarocks", "luarocks-moonscript", "luarocks-luafilesystem", },
+  },
 }
