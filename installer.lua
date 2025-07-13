@@ -55,6 +55,7 @@ local function sanitize_packages() -- and check for errors
       end
     end
     if package.description then
+      if package.prompt then error("Packages cannot have a prompt if they have a description. " .. name:enquote() .. " has both defined.") end
       package.prompt = "Install " .. package.description
     end
     if package.condition then
@@ -277,8 +278,8 @@ end
 local function create_cronjob(schedule, script, sudo)
   local script_name = script:split(" ")[1]
   local lines = {
-    "  uuid=$(uuidgen)",
-    "  cp ./scripts/" .. script_name .. " /opt/$uuid-" .. script_name,
+    "  uuid=tangent-os-setup",   -- no longer $(uuidgen) because creating duplicate entries is baaad
+    "  sudo cp ./scripts/" .. script_name .. " /opt/$uuid-" .. script_name,
     "  croncmd=\"/opt/$uuid-" .. script .. "\"",
     "  cronjob=\"" .. schedule .. " $croncmd\"",
   }

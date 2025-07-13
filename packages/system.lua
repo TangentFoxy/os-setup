@@ -55,9 +55,7 @@ return {
     execute = [[
       sudo apt-get install lua5.1 -y
       sudo apt-get install luarocks -y
-      sudo luarocks install moonscript
     ]],
-    notes = "Installing Luarocks will also install Moonscript.",
     priority = -1,
   },
   luajit = { description = "LuaJIT (Lua 5.1, faster)", apt = "luajit", ask = false, priority = 750, },
@@ -116,6 +114,7 @@ return {
   ["disable-alt-click-drag"] = {
     prompt = "Would you like to disable holding Alt to click and drag from anywhere on a window",
     execute = "gsettings set org.cinnamon.desktop.wm.preferences mouse-button-modifier ''",
+    notes = "Cinnamon-specific.",
     priority = 1,
   },
   ["uuidgen"] = {

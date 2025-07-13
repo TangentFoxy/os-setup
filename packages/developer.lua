@@ -47,7 +47,7 @@ return {
       mv run.sh "Run Fire Tools.sh"
     ]],
     prerequisites = "android-platform-tools",
-    notes = "While out-of-date, the website has useful information:\n https://blog.mrhaydendp.com/projects/fire-tools/",
+    notes = "The website has useful information:\n https://blog.mrhaydendp.com/projects/fire-tools/",
   },
   ["luarocks-moonscript"] = { description = "moonscript from Luarocks", prerequisites = "luarocks", execute = "sudo luarocks install moonscript", },
   ["luarocks-luafilesystem"] = { description = "LuaFileSystem from Luarocks", prerequisites = "luarocks", execute = "sudo luarocks install luafilesystem", },

@@ -105,7 +105,8 @@ return {
   },
   ["tangent-lua-scripts"] = {
     description = "Tangent's Lua Scripts (random misc things)",
-    prerequisites = { "ollama", "git", "luajit", "curl", "yt-dlp", "chromium", "ffmpeg", "pandoc", "luarocks-luafilesystem", }, -- last dependency is optional!
+    prerequisites = { "ollama", "git", "luajit", "curl", "yt-dlp", "chromium", "ffmpeg", "pandoc", },
+    optional_prerequisites = { "luarocks-luafilesystem", },
     execute = [[
       mkdir -p ~/Applications
       cd ~/Applications
