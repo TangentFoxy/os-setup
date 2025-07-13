@@ -22,15 +22,15 @@ function error(message)
 end
 
 local logging_file
-local function printlog(...)
+local function log(...)
   if not logging_file then
     logging_file = io.open(os.date("%Y-%m-%d %H-%M") .. ".log", "a")
   end
   logging_file:write(table.concat({...}, "\t"))
   logging_file:write("\n")
-  print(...)
   -- we don't bother to close because we only want it closed on exit, and it will be automatically closed on exit
 end
+local function printlog(...)   log(...) print(...)   end
 
 
 
@@ -373,6 +373,8 @@ repeat
 
     if options.dry_run then
       print("Simulating '" .. name .. "'...")
+    else
+      log("Installing '" .. name .. "'...")
     end
 
     if package.browse_to then
