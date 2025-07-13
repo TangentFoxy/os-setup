@@ -77,6 +77,9 @@ local function sanitize_packages() -- and check for errors
     if type(package.flatpak) == "string" then
       package.flatpak = { package.flatpak }
     end
+    if type(package.brew) == "string" then -- TODO auto-insert brew dependency?
+      package.brew = { package.brew }
+    end
     if type(package.conditions) ~= "table" then
       package.conditions = { package.conditions }
     end
@@ -366,6 +369,11 @@ repeat
     if package.flatpak then
       for _, name in ipairs(package.flatpak) do
         execute("  flatpak install -y " .. name)
+      end
+    end
+    if package.brew then -- TODO make sure brew is actually available
+      for _, name in ipairs(package.brew) do
+        execute("  brew install " .. name)
       end
     end
 

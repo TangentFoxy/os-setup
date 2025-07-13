@@ -38,7 +38,7 @@ return {
   ["yt-dlp"] = {
     description = "YT-DLP (a CLI media download tool)",
     prerequisites = "brew",
-    execute = "brew install yt-dlp",
+    brew = "yt-dlp",
   },
   audacity = { description = "Audacity (audio editor)", prerequisites = "ffmpeg", ppa = "ppa:ubuntuhandbook1/audacity", apt = "audacity", },
   ["musicbrainz-picard"] = { description = "MusicBrainz Picard (extensive audio tagging software)", apt = "picard", },

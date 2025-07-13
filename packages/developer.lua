@@ -28,7 +28,7 @@ return {
   ["pulsar-language-docker"] = { description = "language-docker for Pulsar", prerequisites = "pulsar", execute = "pulsar -p install language-docker", },
   ["android-platform-tools"] = {
     description = "ADB Tools (for interfacing with Android devices)",
-    execute = "brew install --cask android-platform-tools",
+    brew = "--cask android-platform-tools",
     prerequisites = "brew",
   },
   ["fire-tools"] = {

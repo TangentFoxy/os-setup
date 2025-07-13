@@ -41,6 +41,7 @@ Functions that will be run (in the order shown here):
 - `ppa`: A PPA that must be added to APT.
 - `apt`: Packages that must be installed via APT-GET.
 - `flatpak`: Packages that must be installed via Flatpak.
+- `brew`: Packages that must be installed via brew.
 - `execute`: A shell script to run.
 - `desktop`: Creates a `.desktop` file to put a program in the menu. Must contain `name`, `path`, `exec`, `icon`, and `categories`.
   - See [Recognized desktop entry keys](https://specifications.freedesktop.org/desktop-entry-spec/latest/recognized-keys.html) for what these values should have.
