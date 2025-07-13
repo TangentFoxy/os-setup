@@ -21,6 +21,17 @@ function error(message)
   original_error("\n\n" .. message .. "\n\n")
 end
 
+local logging_file
+local function printlog(...)
+  if not logging_file then
+    logging_file = io.open(os.date("%Y-%m-%d %H-%M") .. ".log", "a")
+  end
+  logging_file:write(table.concat({...}, "\t"))
+  logging_file:write("\n")
+  print(...)
+  -- we don't bother to close because we only want it closed on exit, and it will be automatically closed on exit
+end
+
 
 
 -- TODO reorganize into a load_packages() function to call immediately
@@ -50,14 +61,14 @@ local function sanitize_packages() -- and check for errors
     end
     for _, pkg in ipairs(package.prerequisites) do
       if not packages[pkg] then
-        print("WARNING: " .. name:enquote() .. " lists nonexistant dependency " .. pkg:enquote() .. " and will be ignored.")
+        printlog("WARNING: " .. name:enquote() .. " lists nonexistant dependency " .. pkg:enquote() .. " and will be ignored.")
         package.ignore = true
         -- break   -- no, so ALL unmet dependencies are warned against
       end
     end
     for _, pkg in ipairs(package.optional_prerequisites) do
       if not packages[pkg] then
-        print("WARNING: " .. name:enquote() .. " lists nonexistant optional dependency " .. pkg:enquote() .. ".")
+        printlog("WARNING: " .. name:enquote() .. " lists nonexistant optional dependency " .. pkg:enquote() .. ".")
       end
     end
 
@@ -207,8 +218,8 @@ local function ask(text)
 end
 
 local function system_upgrade()
+  printlog("Making sure system is up-to-date...")
   if options.dry_run then
-    print("Making sure system is up-to-date...")
     print(packages["system-upgrade"].execute)
   else
     os.execute(packages["system-upgrade"].execute)
@@ -315,10 +326,10 @@ local done = false
 local times_run = 0
 repeat
   if times_run > #packages + 10 then
-    print("The following packages have failed to install:")
+    printlog("The following packages have failed to install:")
     for name, package in pairs(packages) do
       if package.status == states.TO_INSTALL then
-        print("  " .. name)
+        printlog("  " .. name)
       end
     end
     error("This script was detected to be looping infinitely.")
@@ -431,4 +442,4 @@ until done
 
 system_upgrade()
 
-print("Looped " .. times_run .. " times to run all scripts.")
+printlog("Looped " .. times_run .. " times to run all scripts.")
