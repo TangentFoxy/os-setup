@@ -5,7 +5,7 @@ return {
   },
   ["obs-studio"] = { description = "OBS Studio (screen streaming/recording)", ppa = "ppa:obsproject/obs-studio", apt = "obs-studio", },
   obsidian = {
-    description = "Obsidian (notetaking/productivity tool)",
+    description = "Obsidian (notetaking/productivity tool)", binary = true,
     browse_to = "https://obsidian.md/download",
     execute = [[
       cd ~/Downloads
@@ -15,6 +15,7 @@ return {
     ]],
   },
   mpv = {
+    -- binary = true, -- TODO find out
     description = "MPV (media player)",
     execute = [[
       sudo curl --output-dir /etc/apt/trusted.gpg.d -O https://apt.fruit.je/fruit.gpg
@@ -24,9 +25,9 @@ return {
     ]],
     notes = "Installing MPV seems to create errors despite successfully installing.",
   },
-  ["ffmpeg"] = { description = "FFMPEG (CLI video encoder)", apt = "ffmpeg", },
+  ["ffmpeg"] = { description = "FFMPEG (CLI video encoder)", apt = "ffmpeg", binary = true, },
   pandoc = {
-    description = "Pandoc (document conversion tool)",
+    description = "Pandoc (document conversion tool)", binary = true,
     browse_to = "https://github.com/jgm/pandoc/releases/latest",
     execute = [[
       cd ~/Downloads
@@ -38,10 +39,10 @@ return {
   ["yt-dlp"] = {
     description = "YT-DLP (a CLI media download tool)",
     prerequisites = "brew",
-    brew = "yt-dlp",
+    brew = "yt-dlp", binary = true,
   },
-  audacity = { description = "Audacity (audio editor)", prerequisites = "ffmpeg", ppa = "ppa:ubuntuhandbook1/audacity", apt = "audacity", },
-  ["musicbrainz-picard"] = { description = "MusicBrainz Picard (extensive audio tagging software)", apt = "picard", },
+  audacity = { description = "Audacity (audio editor)", prerequisites = "ffmpeg", ppa = "ppa:ubuntuhandbook1/audacity", apt = "audacity", binary = true, },
+  ["musicbrainz-picard"] = { description = "MusicBrainz Picard (extensive audio tagging software)", apt = "picard", binary = "picard", },
   imagemagick7 = {
     description = "ImageMagick 7 (CLI image editing tools)", -- prerequisites = "curl", -- everything is assuming curl is installed...
     execute = [[
@@ -50,5 +51,6 @@ return {
       chmod +x ./magick
       sudo mv ./magick /usr/local/bin/
     ]],
+    binary = "magick",
   },
 }

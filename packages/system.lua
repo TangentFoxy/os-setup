@@ -17,7 +17,7 @@ return {
     ignore = true,
   },
   brew = {
-    description = "Brew (user-space package manager, originally for macOS)",
+    description = "Brew (user-space package manager, originally for macOS)", binary = true,
     prerequisites = "git",
     execute = [[
       /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -30,7 +30,7 @@ return {
     priority = 150,
   },
   docker = {
-    description = "Docker (containers!)", priority = 99,
+    description = "Docker (containers!)", priority = 99, binary = true,
     apt = "docker.io", execute = "sudo usermod -aG docker $USER",
   },
   ["docker-compose-legacy"] = {
@@ -47,18 +47,18 @@ return {
   },
   extrepo = {
     description = "extrepo (makes it easy to manage external repositories)",
-    ask = false, apt = "extrepo",
+    ask = false, apt = "extrepo", binary = true,
     priority = 200,
   },
   luarocks = {
-    description = "Luarocks (Lua package manager)",
+    description = "Luarocks (Lua package manager)", binary = true,
     execute = [[
       sudo apt-get install lua5.1 -y
       sudo apt-get install luarocks -y
     ]],
     priority = -1,
   },
-  luajit = { description = "LuaJIT (Lua 5.1, faster)", apt = "luajit", ask = false, priority = 750, },
+  luajit = { description = "LuaJIT (Lua 5.1, faster)", apt = "luajit", ask = false, priority = 750, binary = true, },
   ["purge-firefox"] = {
     prompt = "Do you want to purge Firefox",
     execute = "sudo apt-get purge firefox -y",
@@ -110,6 +110,7 @@ return {
     execute = "ubuntu-drivers autoinstall", -- NOTE I think this needs sudo, but it hasn't errored when not using sudo so I'm confused
     notes = "Obviously, this should only be run on Ubuntu-derived systems.",
     priority = 950, -- do sooner so that if errors interrupt the script, you aren't in a broken state
+    binary = true,
   },
   ["disable-alt-click-drag"] = {
     prompt = "Would you like to disable holding Alt to click and drag from anywhere on a window",
@@ -120,7 +121,7 @@ return {
   ["uuidgen"] = {
     description = "uuidgen (CLI UUID generator)",
     apt = "uuid-runtime", -- probably already installed, but I'd rather just be certain
-    ask = false,
+    ask = false, binary = true,
     priority = 100,
   },
   ["periodic-cleanup-scripts"] = {
@@ -146,5 +147,5 @@ return {
     ppa = "ppa:kisak/kisak-mesa", execute = "sudo apt-get upgrade -y",
     priority = 999, hardware = "integrated_graphics",
   },
-  gparted = { description = "GParted (graphical partition manager)", apt = "gparted", },
+  gparted = { description = "GParted (graphical partition manager)", apt = "gparted", binary = true, },
 }

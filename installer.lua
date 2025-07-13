@@ -119,6 +119,11 @@ local function sanitize_packages() -- and check for errors
         package.desktop.categories = { package.desktop.categories }
       end
     end
+    if package.binary then
+      if package.binary == true then
+        package.binary = name
+      end
+    end
 
     if not package.prerequisites then
       package.prerequisites = {}
@@ -422,6 +427,12 @@ repeat
     end
 
     package.status = states.INSTALLED
+    -- which package.binary if present
+    if package.binary then
+      if not (os.execute(utility.commands.which .. tostring(name) .. utility.commands.silence_output) == 0) then
+        printlog("WARNING: Package " .. name:enquote() .. " appears to have failed to install.")
+      end
+    end
   end
 
   for _, package in ipairs(package_order) do

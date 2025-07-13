@@ -32,6 +32,7 @@ Metadata:
 - `prompt`: For packages that aren't directly *installing* something, a custom prompt can be used. Incompatible with `description`.
 - `priority`: Higher numbers go first. (Everything defaults to 0.) (I've been organizing these in part by how much I want different things, and how *slow* some things are. I prioritize faster and more important things.)
 - `notes`: Extra notes/warnings about the package. (`description` is only meant to have *what* it is.)
+- `binary`: If a `which` command can be run to verify installation, the name of the binary should be here.
 
 Functions that will be run (in the order shown here):
 - `prerequisites`: Package(s) required to be installed *before* this package.

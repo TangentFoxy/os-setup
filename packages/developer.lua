@@ -1,5 +1,6 @@
 return {
-  git = { apt = "git", description = "Git (version control)", ask = false, priority = 200, }, -- has to be installed for this script to even be running...
+  -- has to be installed for this script to even be running...
+  git = { apt = "git", description = "Git (version control)", ask = false, priority = 200, binary = true, },
   ["git-credentials-libsecret"] = {
     prompt = "Configure Git to store credentials securely (using libsecret)",
     prerequisites = "git",
@@ -21,6 +22,7 @@ return {
       rm Linux.pulsar*.deb
     ]],
     priority = -10,
+    binary = true,
   },
   ["pulsar-minimap"] = { description = "minimap for Pulsar", prerequisites = "pulsar", execute = "pulsar -p install minimap", },
   ["pulsar-language-lua"] = { description = "language-lua for Pulsar", prerequisites = "pulsar", execute = "pulsar -p install language-lua", },

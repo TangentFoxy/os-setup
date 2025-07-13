@@ -1,7 +1,7 @@
 return {
-  luanti = { description = "Luanti (voxel game engine, formerly called Minetest)", ppa = "ppa:minetestdevs/stable", apt = "minetest", },
+  luanti = { description = "Luanti (voxel game engine, formerly called Minetest)", ppa = "ppa:minetestdevs/stable", apt = "minetest", binary = true, },
   steam = {
-    description = "Steam (video game platform)",
+    description = "Steam (video game platform)", binary = true,
     execute = [[
       curl -LO https://cdn.fastly.steamstatic.com/client/installer/steam.deb
       sudo dpkg -i steam.deb
@@ -18,6 +18,7 @@ return {
       sudo apt-get install -fy
       rm lutris*.deb
     ]],
+    binary = true,
   },
   openttd = {
     description = "Open Transport Tycoon Deluxe (transport strategy game)",
@@ -57,5 +58,5 @@ return {
     },
     priority = -150,
   },
-  love2d = { description = "Love2D (Lua-based game engine)", ppa = "ppa:bartbes/love-stable", apt = "love", priority = 2, },
+  love2d = { description = "Love2D (Lua-based game engine)", ppa = "ppa:bartbes/love-stable", apt = "love", priority = 2, binary = "love", },
 }

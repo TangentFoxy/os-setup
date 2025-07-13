@@ -1,6 +1,6 @@
 return {
   librewolf = {
-    description = "Librewolf (privacy-preserving Firefox fork)",
+    description = "Librewolf (privacy-preserving Firefox fork)", binary = true,
     prerequisites = "extrepo",
     execute = [[
       sudo extrepo enable librewolf
@@ -37,10 +37,10 @@ return {
     priority = -1,
   },
   nextcloud = {
-    description = "NextCloud (desktop sync app)", apt = "nextcloud-desktop",
+    description = "NextCloud (desktop sync app)", apt = "nextcloud-desktop", binary = true,
     notes = "NextCloud's sync dialog upon initially connecting to a server works badly.\n Set up your connection without file sync, then add it from the app.",
   },
-  keepass = { description = "KeePassXC (password manager)", apt = "keepassxc", priority = 2, },
+  keepass = { description = "KeePassXC (password manager)", apt = "keepassxc", priority = 2, binary = "keepassxc", },
   waydroid = {
     description = "Waydroid (Android-on-Wayland)",
     execute = [[
@@ -52,8 +52,8 @@ return {
     notes = "Can't do this on my system right now, so don't use this.",
     ignore = true,
   },
-  qdirstat = { description = "QDirStat (fast disk usager analyzer)", apt = "qdirstat", },
-  ollama = { description = "Ollama (CLI tool for running local models)", execute = "curl -fsSL https://ollama.com/install.sh | sh", },
+  qdirstat = { description = "QDirStat (fast disk usager analyzer)", apt = "qdirstat", binary = true, },
+  ollama = { description = "Ollama (CLI tool for running local models)", execute = "curl -fsSL https://ollama.com/install.sh | sh", binary = true, },
   dsnote = {
     description = "Speech Note (speech-to-text notetaking)",
     flatpak = "net.mkiol.SpeechNote",
@@ -71,7 +71,7 @@ return {
     flatpak = "net.mkiol.SpeechNote.Addon.amd",
   },
   ["1password"] = {
-    description = "1password (password manager & passkey)",
+    description = "1password (password manager & passkey)", binary = true,
     execute = [[
       cd ~/Downloads
       curl -O https://downloads.1password.com/linux/debian/amd64/stable/1password-latest.deb
@@ -97,15 +97,15 @@ return {
       sudo vboxmanage extpack install Oracle_VirtualBox_Extension_Pack-7.1.4.vbox-extpack --accept-license=eb31505e56e9b4d0fbca139104da41ac6f6b98f8e78968bdf01b1f3da3c4f9ae
       rm ./Oracle_VirtualBox_Extension_Pack*.vbox-extpack
     ]],
-    priority = -1, ignore = true, hardware_exclude = "virtual_machine",
+    priority = -1, ignore = true, hardware_exclude = "virtual_machine", binary = "virtualbox",
   },
   virtualbox = {
-    description = "VirtualBox (OS virtualizer)", apt = "virtualbox",
+    description = "VirtualBox (OS virtualizer)", apt = "virtualbox", binary = true,
     ignore = true, priority = -1, hardware_exclude = "virtual_machine", -- NOTE will probably favor this in the future?
   },
   solaar = {
     description = "Solaar (UI for managing Logitech wireless peripherals)", apt = "solaar",
-    notes = "Solaar configures itself to autostart by default.",
+    notes = "Solaar configures itself to autostart by default.", binary = true,
   },
   ["tangent-lua-scripts"] = {
     description = "Tangent's Lua Scripts (random misc things)",
