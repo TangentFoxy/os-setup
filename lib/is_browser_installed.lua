@@ -21,7 +21,7 @@ return function()
   local file_paths = {}
 
   for _, path in ipairs(paths) do
-    utility.ls(path)(function(file_name)
+    utility.ls(path, function(file_name)
       local _, _, extension = utility.split_path_components(path .. file_name)
       if extension == "desktop" then
         file_paths[#file_paths + 1] = path .. file_name
@@ -30,7 +30,7 @@ return function()
   end
 
   for _, file_path in ipairs(file_paths) do
-    if utility.open(file_path, "r")(function(file)
+    if utility.open(file_path, "r", function(file)
       local line = file:read("*line")
       local browser_found = false
 
