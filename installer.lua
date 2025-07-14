@@ -5,6 +5,7 @@ package.path = (arg[0]:match("@?(.*/)") or arg[0]:match("@?(.*\\)")) .. "?.lua;"
 local utility = require "lib.utility"
 local argparse = require "lib.argparse"
 local is_browser_installed = require "lib.is_browser_installed"
+local json = require "lib.dkjson"
 
 local parser = argparse()
 parser:argument("package", "Select specific package(s). If specified, --default-choice and --interactive options will be ignored."):args("*")
@@ -33,6 +34,15 @@ end
 local function printlog(...)   log(...) print(...)   end
 
 
+
+local installed_list
+if utility.is_file("installed-packages.json") then
+  utility.open("installed-packages.json", "r", function(file)
+    installed_list = json.decode(file:read("*all"))
+  end)
+else
+  installed_list = { packages = {}, }
+end
 
 -- TODO reorganize into a load_packages() function to call immediately
 local packages = {}
@@ -149,6 +159,16 @@ local function sanitize_packages() -- and check for errors
     if #package.cronjobs % 3 ~= 0 then
       config_error("has invalid cronjob definition(s)")
     end
+
+    -- mark already installed packages as INSTALLED (and make sure they are)
+    if installed_list.packages[name] then
+      package.status = states.INSTALLED
+      if package.binary then
+        if not (os.execute(utility.commands.which .. tostring(name) .. utility.commands.silence_output) == 0) then
+          printlog("WARNING: Package " .. name:enquote() .. " is marked as installed, but its binary is not in the system path.")
+        end
+      end
+    end
   end
 end
 sanitize_packages()
@@ -181,6 +201,9 @@ end
 if options.list_packages then
   for _, package in ipairs(package_order) do
     local output = "- [ ] " .. package.name
+    if installed_list.packages[package.name] then
+      output = output .. " (installed)"
+    end
     if packages[package.name].ignore then
       output = output .. " (ignored)"
     end
@@ -194,15 +217,6 @@ end
 
 
 
-local select_package
-select_package = function(name)
-  local package = packages[name]
-  package.status = states.TO_INSTALL
-  for _, name in ipairs(package.prerequisites) do
-    select_package(name)
-  end
-end
-
 local function prompt(text, hide_default_entry)
   io.write(text)
   if options.interactive then
@@ -214,11 +228,27 @@ local function prompt(text, hide_default_entry)
   end
 end
 
-local function ask(text)
+local function ask(text, default_choice)
   local choice = prompt(text)
-  if #choice < 1 then choice = options.default_choice end
+  if #choice < 1 then choice = default_choice or options.default_choice end
   if choice:sub(1):lower() == "y" then
     return true
+  end
+end
+
+local select_package
+select_package = function(name)
+  local package = packages[name]
+
+  if package.status == states.INSTALLED then
+    if not ask(name:enquote() .. " is already installed. Do you want to reinstall it?", "N") then
+      return -- skip this and its dependencies :D
+    end
+  end
+
+  package.status = states.TO_INSTALL
+  for _, name in ipairs(package.prerequisites) do
+    select_package(name)
   end
 end
 
@@ -273,7 +303,7 @@ else
   ask_packages()
 end
 
-system_upgrade()
+
 
 local function execute(...)
   if options.dry_run then
@@ -326,6 +356,10 @@ local function create_cronjob(schedule, script, sudo)
     io.write("\n")
   end
 end
+
+
+
+system_upgrade()
 
 local done = false
 local times_run = 0
@@ -454,5 +488,17 @@ repeat
 until done
 
 system_upgrade()
+
+
+
+for name, package in pairs(packages) do
+  if package.status == states.INSTALLED then
+    installed_list.packages[name] = true
+  end
+end
+utility.open("installed-packages.json", "w", function(file)
+  file:write(json.encode(installed_list, { indent = true }))
+  file:write("\n")
+end)
 
 printlog("Looped " .. times_run .. " times to run all scripts.")
