@@ -12,8 +12,12 @@ parser:argument("package", "Select specific package(s). If specified, --default-
 parser:option("--default-choice", "Default answer to prompts.", "N"):choices{"Y", "N"}:args(1):overwrite(false)
 parser:flag("--dry-run", "Output the commands that would be run instead of running them."):overwrite(false)
 parser:option("--interactive", "Wait for user input.", "true"):choices{"true", "false"}:overwrite(false)
-parser:flag("--show-priority", "List all packages ordered by priority."):overwrite(false)
-parser:flag("--list-packages", "List all packages (presented as a Markdown task list)."):overwrite(false)
+-- commands are done via flags instead of command option
+parser:mutex(
+  parser:flag("--show-priority", "List all packages ordered by priority."):overwrite(false),
+  parser:flag("--list-packages", "List all packages (presented as a Markdown task list)."):overwrite(false),
+  parser:flag("--detect-installed-packages", "Detect binaries in system path that indicate installed packages, and mark them as installed."):overwrite(false),
+)
 
 
 
@@ -33,6 +37,16 @@ local function log(...)
 end
 local function printlog(...)   log(...) print(...)   end
 
+local function check_binary(package, success_func, failure_func)
+  if package.binary then
+    if os.execute(utility.commands.which .. tostring(name) .. utility.commands.silence_output) == 0 then
+      if success_func then return success_func() end
+    else
+      if failure_func then return failure_func() end
+    end
+  end
+end
+
 
 
 local installed_list
@@ -43,6 +57,15 @@ if utility.is_file("installed-packages.json") then
 else
   installed_list = { packages = {}, }
 end
+
+local function save_installed_packages()
+  utility.open("installed-packages.json", "w", function(file)
+    file:write(json.encode(installed_list, { indent = true }))
+    file:write("\n")
+  end)
+end
+
+
 
 -- TODO reorganize into a load_packages() function to call immediately
 -- TODO load anything in packages instead of just a pre-assigned list of file names
@@ -164,11 +187,9 @@ local function sanitize_packages() -- and check for errors
     -- mark already installed packages as INSTALLED (and make sure they are)
     if installed_list.packages[name] then
       package.status = states.INSTALLED
-      if package.binary then
-        if not (os.execute(utility.commands.which .. tostring(name) .. utility.commands.silence_output) == 0) then
-          printlog("WARNING: Package " .. name:enquote() .. " is marked as installed, but its binary is not in the system path.")
-        end
-      end
+      check_binary(package, nil, function()
+        printlog("WARNING: Package " .. name:enquote() .. " is marked as installed, but its binary is not in the system path.")
+      end)
     end
   end
 end
@@ -214,6 +235,18 @@ if options.list_packages then
     print(output)
   end
   return true
+end
+
+if options.detect_installed_packages then
+  for name, package in pairs(packages) do
+    check_binary(package, function()
+      installed_list.packages[name] = true
+      printlog(name:enquote() .. " marked as installed.")
+    end, function()
+      print(name:enquote() .. " is not installed.")
+    end)
+  end
+  save_installed_packages()
 end
 
 
@@ -462,12 +495,9 @@ repeat
     end
 
     package.status = states.INSTALLED
-    -- which package.binary if present
-    if package.binary then
-      if not (os.execute(utility.commands.which .. tostring(name) .. utility.commands.silence_output) == 0) then
-        printlog("WARNING: Package " .. name:enquote() .. " appears to have failed to install.")
-      end
-    end
+    check_binary(package, nil, function()
+      printlog("WARNING: Package " .. name:enquote() .. " appears to have failed to install.")
+    end)
   end
 
   for _, package in ipairs(package_order) do
@@ -497,9 +527,6 @@ for name, package in pairs(packages) do
     installed_list.packages[name] = true
   end
 end
-utility.open("installed-packages.json", "w", function(file)
-  file:write(json.encode(installed_list, { indent = true }))
-  file:write("\n")
-end)
+save_installed_packages()
 
 printlog("Looped " .. times_run .. " times to run all scripts.")
