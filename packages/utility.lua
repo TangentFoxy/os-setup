@@ -120,4 +120,5 @@ return {
       ./add_to_path.sh
     ]],
   },
+  sleek = { description = "sleek (todo.txt-based task manager)", flatpak = "flathub com.github.ransome1.sleek", },
 }

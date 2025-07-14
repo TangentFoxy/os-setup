@@ -45,8 +45,9 @@ else
 end
 
 -- TODO reorganize into a load_packages() function to call immediately
+-- TODO load anything in packages instead of just a pre-assigned list of file names
 local packages = {}
-for _, name in ipairs({ "system", "games", "media", "utility", "developer", }) do
+for _, name in ipairs({ "system", "games", "media", "utility", "developer", "internet", }) do
   local _packages = require("packages." .. name)
   for name, package in pairs(_packages) do
     packages[name] = package

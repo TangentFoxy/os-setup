@@ -15,12 +15,13 @@ return {
   pulsar = {
     description = "Pulsar (code editor, fork of Atom)",
     browse_to = "https://pulsar-edit.dev/download.html#regular-releases",
-    execute = [[
-      cd ~/Downloads
-      sudo dpkg -i Linux.pulsar*.deb
-      sudo apt-get install -fy
-      rm Linux.pulsar*.deb
-    ]],
+    flatpak = "flathub dev.pulsar_edit.Pulsar",
+    -- execute = [[
+    --   cd ~/Downloads
+    --   sudo dpkg -i Linux.pulsar*.deb
+    --   sudo apt-get install -fy
+    --   rm Linux.pulsar*.deb
+    -- ]],
     priority = -10,
     binary = true,
   },

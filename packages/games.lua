@@ -59,4 +59,5 @@ return {
     priority = -150,
   },
   love2d = { description = "Love2D (Lua-based game engine)", ppa = "ppa:bartbes/love-stable", apt = "love", priority = 2, binary = "love", },
+  prism = { description = "Prism (Minecraft Launcher)", flatpak = "flathub org.prismlauncher.PrismLauncher", },
 }
