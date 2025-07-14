@@ -9,6 +9,7 @@ local json = require "lib.dkjson"
 
 local parser = argparse()
 parser:argument("package", "Select specific package(s). If specified, --default-choice and --interactive options will be ignored."):args("*")
+parser:flag("--mark-installed", "Only marks package(s) installed, rather than actually installing them.")
 parser:option("--default-choice", "Default answer to prompts.", "N"):choices{"Y", "N"}:args(1):overwrite(false)
 parser:flag("--dry-run", "Output the commands that would be run instead of running them."):overwrite(false)
 parser:option("--interactive", "Wait for user input.", "true"):choices{"true", "false"}:overwrite(false)
@@ -18,6 +19,8 @@ parser:mutex(
   parser:flag("--list-packages", "List all packages (presented as a Markdown task list)."):overwrite(false),
   parser:flag("--detect-installed-packages", "Detect binaries in system path that indicate installed packages, and mark them as installed."):overwrite(false),
 )
+
+local options = parser:parse()
 
 
 
@@ -39,7 +42,7 @@ local function printlog(...)   log(...) print(...)   end
 
 local function check_binary(package, success_func, failure_func)
   if package.binary then
-    if os.execute(utility.commands.which .. tostring(name) .. utility.commands.silence_output) == 0 then
+    if os.execute(utility.commands.which .. package.name .. utility.commands.silence_output) == 0 then
       if success_func then return success_func() end
     else
       if failure_func then return failure_func() end
@@ -59,6 +62,10 @@ else
 end
 
 local function save_installed_packages()
+  if options.dry_run then
+    print("Dry run: Not saving installed packages.")
+    return
+  end
   utility.open("installed-packages.json", "w", function(file)
     file:write(json.encode(installed_list, { indent = true }))
     file:write("\n")
@@ -87,6 +94,8 @@ local function sanitize_packages() -- and check for errors
   end
 
   for name, package in pairs(packages) do
+    package.name = name
+
     if type(package.prerequisites) == "string" then
       package.prerequisites = { package.prerequisites }
     end
@@ -205,8 +214,6 @@ end
 table.sort(package_order, function(a, b) return a.priority > b.priority end)
 
 
-
-local options = parser:parse()
 
 if options.interactive == "false" then
   options.interactive = false
@@ -410,6 +417,11 @@ repeat
 
   local function _install(name, package)
     if package.status ~= states.TO_INSTALL then
+      return
+    end
+
+    if options.mark_installed then
+      package.status = states.INSTALLED
       return
     end
 
