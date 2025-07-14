@@ -29,6 +29,7 @@ return {
   pandoc = {
     description = "Pandoc (document conversion tool)", binary = true,
     browse_to = "https://github.com/jgm/pandoc/releases/latest",
+    prerequisites = "xelatex",
     execute = [[
       cd ~/Downloads
       sudo dpkg -i pandoc*.deb
@@ -36,6 +37,7 @@ return {
       rm pandoc*.deb
     ]],
   },
+  xelatex = { description = "xelatex (PDF engine used for Pandoc)", apt = "texlive-xetex", binary = true, ask = false, },
   ["yt-dlp"] = {
     description = "YT-DLP (a CLI media download tool)",
     prerequisites = "brew",
