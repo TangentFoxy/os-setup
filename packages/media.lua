@@ -55,4 +55,8 @@ return {
     ]],
     binary = "magick",
   },
+  calibre = {
+    description = "Calibre (ebook manager)", binary = true,
+    execute = "sudo -v && wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sudo sh /dev/stdin",
+  },
 }
