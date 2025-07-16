@@ -465,6 +465,17 @@ repeat
       end
     end
 
+    -- mark installed and skip installing if a binary is present
+    check_binary(package, function()
+      if not ask(name:enquote() .. " appears to already be installed. Do you want to reinstall it (y/n, default: n)?", "N") then
+        package.status = states.INSTALLED
+        installed_list.packages[name] = true
+        log("Marked " .. name:enquote() .. " as installed.")
+        return
+      end
+      log("Reinstalling " .. name:enquote())
+    end)
+
 
 
     if options.dry_run then
@@ -522,6 +533,7 @@ repeat
     end
 
     package.status = states.INSTALLED
+    installed_list.packages[name] = true
     check_binary(package, nil, function()
       printlog("WARNING: Package " .. name:enquote() .. " appears to have failed to install.")
     end)
@@ -547,13 +559,6 @@ until done
 
 system_upgrade()
 
-
-
-for name, package in pairs(packages) do
-  if package.status == states.INSTALLED then
-    installed_list.packages[name] = true
-  end
-end
 save_installed_packages()
 
 printlog("Looped " .. times_run .. " times to run all scripts.")
