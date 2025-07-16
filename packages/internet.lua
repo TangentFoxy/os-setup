@@ -1,5 +1,5 @@
 return {
-  betterbird = { description = "Betterbird (Thunderbird-based email client, that won't lose your data)", flatpak = "flathub eu.betterbird.Betterbird", },
+  betterbird = { description = "Betterbird (Thunderbird-based email client, that won't lose your data)", flatpak = "flathub eu.betterbird.Betterbird", unprivileged = true, },
   vivaldi = {
     description = "Vivaldi (chromium-based browser)", binary = true,
     execute = [[

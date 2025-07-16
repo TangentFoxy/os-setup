@@ -14,8 +14,8 @@ return {
   },
   pulsar = {
     description = "Pulsar (code editor, fork of Atom)",
-    browse_to = "https://pulsar-edit.dev/download.html#regular-releases",
     flatpak = "flathub dev.pulsar_edit.Pulsar",
+    -- browse_to = "https://pulsar-edit.dev/download.html#regular-releases",
     -- execute = [[
     --   cd ~/Downloads
     --   sudo dpkg -i Linux.pulsar*.deb
@@ -23,14 +23,14 @@ return {
     --   rm Linux.pulsar*.deb
     -- ]],
     priority = -10,
-    binary = true,
+    binary = true, unprivileged = true,
   },
-  ["pulsar-minimap"] = { description = "minimap for Pulsar", prerequisites = "pulsar", execute = "pulsar -p install minimap", },
-  ["pulsar-language-lua"] = { description = "language-lua for Pulsar", prerequisites = "pulsar", execute = "pulsar -p install language-lua", },
-  ["pulsar-language-moonscript"] = { description = "language-moonscript for Pulsar", prerequisites = "pulsar", execute = "pulsar -p install language-moonscript", },
-  ["pulsar-language-docker"] = { description = "language-docker for Pulsar", prerequisites = "pulsar", execute = "pulsar -p install language-docker", },
+  ["pulsar-minimap"] = { description = "minimap for Pulsar", prerequisites = "pulsar", execute = "pulsar -p install minimap", unprivileged = true, },
+  ["pulsar-language-lua"] = { description = "language-lua for Pulsar", prerequisites = "pulsar", execute = "pulsar -p install language-lua", unprivileged = true, },
+  ["pulsar-language-moonscript"] = { description = "language-moonscript for Pulsar", prerequisites = "pulsar", execute = "pulsar -p install language-moonscript", unprivileged = true, },
+  ["pulsar-language-docker"] = { description = "language-docker for Pulsar", prerequisites = "pulsar", execute = "pulsar -p install language-docker", unprivileged = true, },
   ["pulsar-complete"] = {
-    description = "Pulsar (code editor, fork of Atom) + several useful plugins",
+    description = "Pulsar (code editor, fork of Atom) + several useful plugins", unprivileged = true,
     prerequisites = { "pulsar", "pulsar-minimap", "pulsar-language-lua", "pulsar-language-moonscript", "pulsar-language-docker", },
   },
   ["android-platform-tools"] = {

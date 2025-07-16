@@ -12,6 +12,7 @@ return {
   ["security-utilities"] = {
     description = "PIA, KeePassXC, ",
     prerequisites = { "pia", "keepass", "1password", },
+    unprivileged = false, -- all dependencies require sudo
   },
   pia = {
     description = "Private Internet Access (cheap, secure VPN)",
@@ -57,18 +58,18 @@ return {
   dsnote = {
     description = "Speech Note (speech-to-text notetaking)",
     flatpak = "net.mkiol.SpeechNote",
-    priority = -101,
+    priority = -101, unprivileged = true,
   },
   ["dsnote-nvidia"] = {
     description = "Speech Note NVIDIA accelerator",
     prerequisites = "dsnote", hardware = "NVIDIA",
-    flatpak = "net.mkiol.SpeechNote.Addon.nvidia",
+    flatpak = "net.mkiol.SpeechNote.Addon.nvidia", unprivileged = true,
   },
   ["dsnote-amd"] = {
     notes = "AMD support is not recommended right now due to its large size and limited utility,\n but in the near future may be recommended. See https://github.com/mkiol/dsnote/issues/271 for details.",
     description = "Speech Note AMD accelerator",
     prerequisites = "dsnote", hardware = "AMD",
-    flatpak = "net.mkiol.SpeechNote.Addon.amd",
+    flatpak = "net.mkiol.SpeechNote.Addon.amd", unprivileged = true,
   },
   ["1password"] = {
     description = "1password (password manager & passkey)", binary = true,
@@ -119,6 +120,7 @@ return {
       echo Adding lua-scripts to path. A warning will now appear:
       ./add_to_path.sh
     ]],
+    unprivileged = false, -- all prerequisites require sudo
   },
-  sleek = { description = "sleek (todo.txt-based task manager)", flatpak = "flathub com.github.ransome1.sleek", },
+  sleek = { description = "sleek (todo.txt-based task manager)", flatpak = "flathub com.github.ransome1.sleek", unprivileged = true, },
 }

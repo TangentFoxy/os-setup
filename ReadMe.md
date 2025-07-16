@@ -34,6 +34,7 @@ Metadata:
 - `notes`: Extra notes/warnings about the package. (`description` is only meant to have *what* it is.)
 - `binary`: If a `which` command can be run to verify installation, the name of the binary should be here.
 - `name`: **Do not set this.** (Automatically added for internal functionality.)
+- `unprivileged`: If the package can be installer for the current user only / without access to sudo.
 
 Functions that will be run (in the order shown here):
 - `prerequisites`: Package(s) required to be installed *before* this package.

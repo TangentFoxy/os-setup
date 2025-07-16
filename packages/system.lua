@@ -83,7 +83,7 @@ return {
       rm ./import-private-config.lua
       # git config --global init.defaultBranch main   # I shouldn't need this soon hopefully..
     ]],
-    priority = 99,
+    priority = 99, unprivileged = true,
   },
   ["unattended-upgrades"] = {
     prompt = "Would you like automatic background security updates",
@@ -115,8 +115,8 @@ return {
   ["disable-alt-click-drag"] = {
     prompt = "Would you like to disable holding Alt to click and drag from anywhere on a window",
     execute = "gsettings set org.cinnamon.desktop.wm.preferences mouse-button-modifier ''",
-    notes = "Cinnamon-specific.",
-    priority = 1,
+    notes = "Cinnamon-specific.", -- TODO needs "hardware" detection to only enable where appropriate
+    priority = 1, unprivileged = true,
   },
   ["uuidgen"] = {
     description = "uuidgen (CLI UUID generator)",
@@ -131,7 +131,7 @@ return {
       "* * * * 2", "user-cleanup.sh", false,
       "* * * * 1", "root-cleanup.sh", true,
     },
-    priority = 5,
+    priority = 5, unprivileged = false, -- marked so I don't forget that this can't be changed
   },
   ["cpu-limiter"] = {
     prompt = "Do you want to limit max CPU usage to 65%", -- highly specific for my dying desktop :'D

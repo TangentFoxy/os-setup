@@ -9,7 +9,8 @@ local json = require "lib.dkjson"
 
 local parser = argparse()
 parser:argument("package", "Select specific package(s). If specified, --default-choice and --interactive options will be ignored."):args("*")
-parser:flag("--mark-installed", "Only marks package(s) installed, rather than actually installing them.")
+parser:flag("--mark-installed", "Only marks package(s) installed, rather than actually installing them."):overwrite(false)
+parser:flag("--unprivileged", "Only try to install package(s) that don't require sudo / install for the current user only."):overwrite(false)
 parser:option("--default-choice", "Default answer to prompts.", "N"):choices{"Y", "N"}:args(1):overwrite(false)
 parser:flag("--dry-run", "Output the commands that would be run instead of running them."):overwrite(false)
 parser:option("--interactive", "Wait for user input.", "true"):choices{"true", "false"}:overwrite(false)
@@ -117,6 +118,9 @@ local function sanitize_packages() -- and check for errors
 
     if package.ask or package.ask == nil then
       package.status = states.TO_ASK
+    end
+    if options.unprivileged and not package.unprivileged then
+      package.status = states.IGNORED
     end
     if package.ignore then
       package.status = states.IGNORED
@@ -282,9 +286,16 @@ select_package = function(name)
   local package = packages[name]
 
   if package.status == states.INSTALLED then
-    if not ask(name:enquote() .. " is already installed. Do you want to reinstall it?", "N") then
+    if not ask(name:enquote() .. " is already installed. Do you want to reinstall it (y/n, default: n)?", "N") then
       return -- skip this and its dependencies :D
     end
+  end
+
+  if options.unprivileged and not package.unprivileged then
+    if not ask(name:enquote() .. " cannot be installed unprivileged. Do you want to try to install it anyhow (y/n, default: n)?", "N") then
+      return
+    end
+    log("Attempting to install " .. name:enquote() .. " while --unprivileged flag is set.")
   end
 
   package.status = states.TO_INSTALL
@@ -479,8 +490,12 @@ repeat
       execute("  sudo apt-get install -y " .. table.concat(package.apt, " "))
     end
     if package.flatpak then
+      local flatpak_command = "  flatpak install -y "
+      if package.unprivileged then
+        flatpak_command = flatpak_command .. "--user "
+      end
       for _, name in ipairs(package.flatpak) do
-        execute("  flatpak install -y " .. name)
+        execute(flatpak_command .. name)
       end
     end
     if package.brew then -- TODO make sure brew is actually available

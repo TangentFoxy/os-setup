@@ -1,7 +1,7 @@
 return {
   grayjay = {
     description = "Grayjay (stream videos directly from your favorite creators)",
-    flatpak = "flathub app.grayjay.Grayjay", priority = -1,
+    flatpak = "flathub app.grayjay.Grayjay", priority = -1, unprivileged = true,
   },
   ["obs-studio"] = { description = "OBS Studio (screen streaming/recording)", ppa = "ppa:obsproject/obs-studio", apt = "obs-studio", },
   obsidian = {

@@ -37,7 +37,7 @@ return {
       icon = "$HOME/Applications/OpenTTD/share/icons/hicolor/256x256/apps/openttd.png",
       categories = { "Game", "StrategyGame", },
     },
-    priority = -1,
+    priority = -1, unprivileged = true,
   },
   ["stunt-rally"] = {
     description = "StuntRally (rally racing game)",
@@ -56,8 +56,8 @@ return {
       icon = "$HOME/Applications/StuntRally/data/gui/stuntrally.png",
       categories = { "Game", "Simulation", },
     },
-    priority = -150,
+    priority = -150, unprivileged = true,
   },
   love2d = { description = "Love2D (Lua-based game engine)", ppa = "ppa:bartbes/love-stable", apt = "love", priority = 2, binary = "love", },
-  prism = { description = "Prism (Minecraft Launcher)", flatpak = "flathub org.prismlauncher.PrismLauncher", },
+  prism = { description = "Prism (Minecraft Launcher)", flatpak = "flathub org.prismlauncher.PrismLauncher", unprivileged = true, },
 }
