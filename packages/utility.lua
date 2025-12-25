@@ -123,4 +123,5 @@ return {
     unprivileged = false, -- all prerequisites require sudo
   },
   sleek = { description = "sleek (todo.txt-based task manager)", flatpak = "flathub com.github.ransome1.sleek", unprivileged = true, },
+  peazip = { description = "peazip (graphical archive manager)", flatpak = "flathub io.github.peazip.PeaZip", unprivileged = true, },
 }
