@@ -59,4 +59,5 @@ return {
     description = "Calibre (ebook manager)", binary = true,
     execute = "sudo -v && wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sudo sh /dev/stdin",
   },
+  gimp = { description = "GIMP (image editor)", flatpak = "flathub org.gimp.GIMP", unprivileged = true, },
 }
