@@ -178,12 +178,6 @@ local function sanitize_packages() -- and check for errors
       end
     end
 
-    if not package.prerequisites then
-      package.prerequisites = {}
-    end
-    if not package.optional_prerequisites then
-      package.optional_prerequisites = {}
-    end
     if not package.conditions then
       package.conditions = {}
     end
