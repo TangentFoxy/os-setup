@@ -43,7 +43,7 @@ local function printlog(...)   log(...) print(...)   end
 
 local function check_binary(package, success_func, failure_func)
   if package.binary then
-    if os.execute(utility.commands.which .. package.name .. utility.commands.silence_output) == 0 then
+    if os.execute(utility.commands.which .. package.binary .. utility.commands.silence_output) == 0 then
       if success_func then return success_func() end
     else
       if failure_func then return failure_func() end
