@@ -516,7 +516,7 @@ repeat
     end
     if package.brew then -- TODO make sure brew is actually available
       for _, name in ipairs(package.brew) do
-        exit_code_accumulator = exit_code_accumulator + execute("  brew install " .. name)
+        exit_code_accumulator = exit_code_accumulator + execute("  eval \"$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)\"\n  brew install " .. name)
       end
     end
 
