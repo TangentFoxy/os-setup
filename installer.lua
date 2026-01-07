@@ -366,8 +366,21 @@ local function execute(...)
   end
 end
 
+local function make_accumulator()
+  local exit_code = 0
+  return function(action)
+    local action_type = type(action)
+    if action_type == "string" then
+      exit_code = exit_code + execute(action)
+    elseif action_type == "number" then
+      exit_code = exit_code + action
+    end
+    return exit_code
+  end
+end
+
 local function create_menu_entry(desktop)
-  local exit_code_accumulator = 0
+  local accumulator = make_accumulator()
   local desktop_file_name = desktop.path .. "/" .. desktop.name .. ".desktop"
   local lines = {
     "[Desktop Entry]",
@@ -380,16 +393,16 @@ local function create_menu_entry(desktop)
     "Categories=" .. table.concat(desktop.categories, "\\;"),
   }
   for _, line in ipairs(lines) do
-    exit_code_accumulator = exit_code_accumulator + execute("  echo " .. line .. " >> " .. desktop_file_name)
+    accumulator("  echo " .. line .. " >> " .. desktop_file_name)
   end
-  exit_code_accumulator = exit_code_accumulator + execute("  chmod +x " .. desktop_file_name)
-  exit_code_accumulator = exit_code_accumulator + execute("  desktop-file-validate " .. desktop_file_name)
-  exit_code_accumulator = exit_code_accumulator + execute("  desktop-file-install --dir=$HOME/.local/share/applications " .. desktop_file_name)
-  exit_code_accumulator = exit_code_accumulator + execute("  update-desktop-database ~/.local/share/applications") -- appears to be unnecessary on Mint
+  accumulator("  chmod +x " .. desktop_file_name)
+  accumulator("  desktop-file-validate " .. desktop_file_name)
+  accumulator("  desktop-file-install --dir=$HOME/.local/share/applications " .. desktop_file_name)
+  accumulator("  update-desktop-database ~/.local/share/applications") -- appears to be unnecessary on Mint
   if options.dry_run then
     io.write("\n")
   end
-  return exit_code_accumulator
+  return accumulator()
 end
 
 local function create_cronjob(schedule, script, sudo)
@@ -487,7 +500,7 @@ repeat
       log("Installing '" .. name .. "'...")
     end
 
-    local exit_code_accumulator = 0
+    local accumulator = make_accumulator()
 
     if package.browse_to then
       local download_url = package.browse_to[1]
@@ -495,15 +508,15 @@ repeat
 
       print("Opening your browser to a download page.")
       print("Make sure you choose the " .. file_description .. " file and that it is saved to ~/Downloads")
-      exit_code_accumulator = exit_code_accumulator + execute("  open " .. download_url)
+      accumulator("  open " .. download_url)
       prompt("Press enter when the download is finished.", true)
     end
 
     if package.ppa then
-      exit_code_accumulator = exit_code_accumulator + execute("  sudo add-apt-repository -y " .. package.ppa .. " && sudo apt-get update")
+      accumulator("  sudo add-apt-repository -y " .. package.ppa .. " && sudo apt-get update")
     end
     if package.apt then
-      exit_code_accumulator = exit_code_accumulator + execute("  sudo apt-get install -y " .. table.concat(package.apt, " "))
+      accumulator("  sudo apt-get install -y " .. table.concat(package.apt, " "))
     end
     if package.flatpak then
       local flatpak_command = "  flatpak install -y "
@@ -511,33 +524,33 @@ repeat
         flatpak_command = flatpak_command .. "--user "
       end
       for _, name in ipairs(package.flatpak) do
-        exit_code_accumulator = exit_code_accumulator + execute(flatpak_command .. name)
+        accumulator(flatpak_command .. name)
       end
     end
     if package.brew then -- TODO make sure brew is actually available
       for _, name in ipairs(package.brew) do
-        exit_code_accumulator = exit_code_accumulator + execute("  eval \"$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)\"\n  brew install " .. name)
+        accumulator("  eval \"$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)\"\n  brew install " .. name)
       end
     end
 
     if package.execute then
-      exit_code_accumulator = exit_code_accumulator + execute(package.execute)
+      accumulator(package.execute)
     elseif options.dry_run then
       io.write("\n")
     end
 
     if package.desktop then
-      exit_code_accumulator = exit_code_accumulator + create_menu_entry(package.desktop)
+      accumulator(create_menu_entry(package.desktop))
     end
 
     for i = 1, #package.cronjobs, 3 do
       local schedule = package.cronjobs[i]
       local script = package.cronjobs[i + 1]
       local sudo = package.cronjobs[i + 2]
-      exit_code_accumulator = exit_code_accumulator + create_cronjob(schedule, script, sudo)
+      accumulator(create_cronjob(schedule, script, sudo))
     end
 
-    if exit_code_accumulator == 0 then
+    if accumulator() == 0 then
       package.status = states.INSTALLED
       installed_list.packages[name] = true
       check_binary(package, nil, function()
@@ -545,7 +558,7 @@ repeat
       end)
     else
       package.status = states.INSTALL_FAILED
-      printlog("Failed to install " .. name:enquote() .. " (accumulated exit code: " .. exit_code_accumulator .. ")")
+      printlog("Failed to install " .. name:enquote() .. " (accumulated exit code: " .. accumulator() .. ")")
     end
   end
 
