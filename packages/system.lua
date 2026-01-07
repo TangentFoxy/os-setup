@@ -16,9 +16,9 @@ return {
     ]],
     ignore = true,
   },
-  curl = { ask = false, apt = "curl", binary = true, priority = 99999, },
-  wget = { ask = false, apt = "wget", binary = true, priority = 99999, },
-  unzip = { ask = false, apt = "unzip", binary = true, priority = 99999, },
+  curl = { ask = false, apt = "curl", binary = true, priority = 99999, description = "", },
+  wget = { ask = false, apt = "wget", binary = true, priority = 99999, description = "", },
+  unzip = { ask = false, apt = "unzip", binary = true, priority = 99999, description = "", },
   ["software-properties-common"] = {
     prompt = "Enable PPAs (required on Elementary OS)",      -- is this on other distros? should it be a special thing in the main script?
     apt = "software-properties-common", priority = 999999,   --  should this be marked a dependency for every PPA runner?

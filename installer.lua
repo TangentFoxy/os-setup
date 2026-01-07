@@ -90,7 +90,7 @@ local states = utility.enumerate({ "IGNORED", "TO_ASK", "TO_INSTALL", "INSTALLED
 local function sanitize_packages() -- and check for errors
   local detected_hardware = require "lib.detected_hardware"
 
-  local function config_error(reason)
+  local function config_error(name, reason)
     error("Package '" .. name .. "' " .. reason .. ".\nPlease report this issue at https://github.com/TangentFoxy/os-setup/issues")
   end
 
@@ -142,7 +142,7 @@ local function sanitize_packages() -- and check for errors
       end
     end
     if package.description then
-      if package.prompt then config_error("has a prompt and a description (incompatible)") end
+      if package.prompt then config_error(name, "has a prompt and a description (incompatible)") end
       package.prompt = "Install " .. package.description
     end
     if package.condition then
@@ -190,11 +190,11 @@ local function sanitize_packages() -- and check for errors
     end
 
     if not package.prompt then
-      config_error("lacks a prompt or description")
+      printlog("WARNING: " .. name:enquote() .. "lacks a prompt or description.\nPlease report this issue at https://github.com/TangentFoxy/os-setup/issues")
     end
     -- TODO check for other types of error
     if #package.cronjobs % 3 ~= 0 then
-      config_error("has invalid cronjob definition(s)")
+      config_error(name, "has invalid cronjob definition(s)")
     end
 
     -- mark already installed packages as INSTALLED (and make sure they are)
