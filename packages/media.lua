@@ -14,8 +14,10 @@ return {
       rm obsidian*.deb
     ]],
   },
-  mpv = {
-    -- binary = true, -- TODO find out
+  mpv = { description = "MPV (media player)", flatpak = "flathub io.mpv.Mpv", unprivileged = true, },
+  ["mpv-legacy"] = {
+    -- binary = true, -- TODO find out if this actually is true
+    ignore = true, ask = false,
     description = "MPV (media player)",
     execute = [[
       sudo curl --output-dir /etc/apt/trusted.gpg.d -O https://apt.fruit.je/fruit.gpg
