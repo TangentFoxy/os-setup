@@ -426,7 +426,7 @@ repeat
         printlog("  " .. name)
       end
     end
-    error("This script was detected to be looping infinitely.")
+    error("installer.lua (os-setup) script was detected to be looping infinitely.")
   end
 
   local function _install(name, package)
