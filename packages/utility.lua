@@ -1,14 +1,4 @@
 return {
-  librewolf = {
-    description = "Librewolf (privacy-preserving Firefox fork)", binary = true,
-    prerequisites = "extrepo",
-    execute = [[
-      sudo extrepo enable librewolf
-      sudo apt-get update
-      sudo apt-get install librewolf -y
-    ]],
-    priority = 110,
-  },
   ["security-utilities"] = {
     description = "PIA, KeePassXC, 1password",
     prerequisites = { "pia", "keepass", "1password", },
