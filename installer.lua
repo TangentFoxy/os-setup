@@ -487,8 +487,9 @@ repeat
         package.status = states.INSTALLED
         installed_list.packages[name] = true
         log("Marked " .. name:enquote() .. " as installed.")
+      else
+        log("Reinstalling " .. name:enquote())
       end
-      log("Reinstalling " .. name:enquote())
     end)
     if package.status == states.INSTALLED then
       return
