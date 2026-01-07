@@ -10,7 +10,7 @@ return {
     priority = 110,
   },
   ["security-utilities"] = {
-    description = "PIA, KeePassXC, ",
+    description = "PIA, KeePassXC, 1password",
     prerequisites = { "pia", "keepass", "1password", },
     unprivileged = false, -- all dependencies require sudo
   },
