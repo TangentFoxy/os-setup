@@ -103,12 +103,11 @@ return {
   },
   ["tangent-lua-scripts"] = {
     description = "Tangent's Lua Scripts (random misc things)",
-    -- why is chromium a prerequisite here ???
-    prerequisites = { "ollama", "git", "luajit", "curl", "yt-dlp", "chromium", "ffmpeg", "pandoc", },
-    optional_prerequisites = { "luarocks-luafilesystem", },
+    -- TODO find out why chromium is a prerequisite here - it should be 'open' instead, right ???
+    prerequisites = { "git", "luajit", },
+    optional_prerequisites = { "ollama", "chromium", "yt-dlp", "ffmpeg", "pandoc", "curl", "luarocks-luafilesystem", },
     execute = [[
-      mkdir -p ~/Applications
-      cd ~/Applications
+      cd ~/Documents
       git clone https://github.com/TangentFoxy/lua-scripts --depth=1
       cd lua-scripts
       echo Adding lua-scripts to path. A warning will now appear:
