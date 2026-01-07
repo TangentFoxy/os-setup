@@ -18,7 +18,7 @@ parser:option("--interactive", "Wait for user input.", "true"):choices{"true", "
 parser:mutex(
   parser:flag("--show-priority", "List all packages ordered by priority."):overwrite(false),
   parser:flag("--list-packages", "List all packages (presented as a Markdown task list)."):overwrite(false),
-  parser:flag("--detect-installed-packages", "Detect binaries in system path that indicate installed packages, and mark them as installed."):overwrite(false),
+  parser:flag("--detect-installed-packages", "Detect binaries in system path that indicate installed packages, and mark them as installed."):overwrite(false)
 )
 
 local options = parser:parse()
@@ -102,6 +102,12 @@ local function sanitize_packages() -- and check for errors
     end
     if type(package.optional_prerequisites) == "string" then
       package.optional_prerequisites = { package.optional_prerequisites }
+    end
+    if not package.prerequisites then
+      package.prerequisites = {}
+    end
+    if not package.optional_prerequisites then
+      package.optional_prerequisites = {}
     end
     for _, pkg in ipairs(package.prerequisites) do
       if not packages[pkg] then
