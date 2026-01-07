@@ -148,4 +148,5 @@ return {
     priority = 999, hardware = "integrated_graphics",
   },
   gparted = { description = "GParted (graphical partition manager)", apt = "gparted", binary = true, },
+  ncdu = { description = "ncurses disk usage viewer", apt = "ncdu", binary = true, },
 }
