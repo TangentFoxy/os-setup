@@ -19,6 +19,10 @@ return {
   curl = { ask = false, apt = "curl", binary = true, priority = 99999, },
   wget = { ask = false, apt = "wget", binary = true, priority = 99999, },
   unzip = { ask = false, apt = "unzip", binary = true, priority = 99999, },
+  ["software-properties-common"] = {
+    prompt = "Enable PPAs (required on Elementary OS)",      -- is this on other distros? should it be a special thing in the main script?
+    apt = "software-properties-common", priority = 999999,   --  should this be marked a dependency for every PPA runner?
+  },
   brew = {
     description = "Brew (user-space package manager, originally for macOS)", binary = true,
     prerequisites = { "git", "curl", },
