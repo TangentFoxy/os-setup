@@ -16,7 +16,7 @@ return {
     priority = 1,
   },
   telegram = {
-    description = "Telegram Desktop (messenger)",
+    description = "Telegram Desktop (messenger)", -- prerequisites = "curl",   -- curl doesn't work for some reason
     browse_to = { "https://telegram.org/dl/desktop/linux", ".tar.xz (it should have automatically started)", },
     execute = [[
       cd ~/Downloads
@@ -33,7 +33,7 @@ return {
   },
   keepass = { description = "KeePassXC (password manager)", apt = "keepassxc", priority = 2, binary = "keepassxc", },
   waydroid = {
-    description = "Waydroid (Android-on-Wayland)",
+    description = "Waydroid (Android-on-Wayland)", prerequisites = "curl",
     execute = [[
       # sudo systemctl enable --now waydroid-container   # this was supposed to work but didn't :D
       curl -s https://repo.waydro.id | sudo bash
@@ -44,7 +44,10 @@ return {
     ignore = true,
   },
   qdirstat = { description = "QDirStat (fast disk usager analyzer)", apt = "qdirstat", binary = true, },
-  ollama = { description = "Ollama (CLI tool for running local models)", execute = "curl -fsSL https://ollama.com/install.sh | sh", binary = true, },
+  ollama = {
+    description = "Ollama (CLI tool for running local models)",
+    execute = "curl -fsSL https://ollama.com/install.sh | sh", binary = true, prerequisites = "curl",
+  },
   dsnote = {
     description = "Speech Note (speech-to-text notetaking)",
     flatpak = "net.mkiol.SpeechNote",
@@ -62,7 +65,7 @@ return {
     flatpak = "net.mkiol.SpeechNote.Addon.amd", unprivileged = true,
   },
   ["1password"] = {
-    description = "1password (password manager & passkey)", binary = true,
+    description = "1password (password manager & passkey)", binary = true, prerequisites = "curl",
     execute = [[
       cd ~/Downloads
       curl -O https://downloads.1password.com/linux/debian/amd64/stable/1password-latest.deb
@@ -73,7 +76,7 @@ return {
     priority = 2,
   },
   ["virtualbox-7.1"] = {
-    description = "VirtualBox 7.1 (OS virtualizer)",
+    description = "VirtualBox 7.1 (OS virtualizer)", prerequisites = "curl",
     execute = [[
       # sudo apt install curl wget apt-transport-https gnupg2 -y   # what a dumb idea, these will be installed if needed, duh
       curl -fsSL https://www.virtualbox.org/download/oracle_vbox_2016.asc | sudo gpg --dearmor -o /usr/share/keyrings/oracle-virtualbox-2016.gpg
@@ -100,6 +103,7 @@ return {
   },
   ["tangent-lua-scripts"] = {
     description = "Tangent's Lua Scripts (random misc things)",
+    -- why is chromium a prerequisite here ???
     prerequisites = { "ollama", "git", "luajit", "curl", "yt-dlp", "chromium", "ffmpeg", "pandoc", },
     optional_prerequisites = { "luarocks-luafilesystem", },
     execute = [[

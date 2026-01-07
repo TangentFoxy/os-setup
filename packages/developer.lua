@@ -41,6 +41,7 @@ return {
   ["fire-tools"] = {
     description = "Fire Tools (small GUI program to improve Amazon Fire tablets)",
     apt = { "python3-pip", "python3.12-venv", "python3-tk", },
+    prerequisites = { "curl", "unzip", },
     execute = [[
       curl -LO https://github.com/mrhaydendp/fire-tools/releases/latest/download/Fire-Tools.zip
       unzip Fire-Tools.zip && rm Fire-Tools.zip

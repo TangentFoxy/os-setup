@@ -1,7 +1,7 @@
 return {
   luanti = { description = "Luanti (voxel game engine, formerly called Minetest)", ppa = "ppa:minetestdevs/stable", apt = "minetest", binary = true, },
   steam = {
-    description = "Steam (video game platform)", binary = true,
+    description = "Steam (video game platform)", binary = true, prerequisites = "curl",
     execute = [[
       curl -LO https://cdn.fastly.steamstatic.com/client/installer/steam.deb
       sudo dpkg -i steam.deb

@@ -17,7 +17,7 @@ return {
   mpv = { description = "MPV (media player)", flatpak = "flathub io.mpv.Mpv", unprivileged = true, },
   ["mpv-legacy"] = {
     -- binary = true, -- TODO find out if this actually is true
-    ignore = true, ask = false,
+    ignore = true, ask = false, prerequisites = "curl",
     description = "MPV (media player)",
     execute = [[
       sudo curl --output-dir /etc/apt/trusted.gpg.d -O https://apt.fruit.je/fruit.gpg
@@ -48,7 +48,7 @@ return {
   audacity = { description = "Audacity (audio editor)", prerequisites = "ffmpeg", ppa = "ppa:ubuntuhandbook1/audacity", apt = "audacity", binary = true, },
   ["musicbrainz-picard"] = { description = "MusicBrainz Picard (extensive audio tagging software)", apt = "picard", binary = "picard", },
   imagemagick7 = {
-    description = "ImageMagick 7 (CLI image editing tools)", -- prerequisites = "curl", -- everything is assuming curl is installed...
+    description = "ImageMagick 7 (CLI image editing tools)", prerequisites = "curl",
     execute = [[
       cd ~/Downloads
       curl -LO https://imagemagick.org/archive/binaries/magick
@@ -58,7 +58,7 @@ return {
     binary = "magick",
   },
   calibre = {
-    description = "Calibre (ebook manager)", binary = true,
+    description = "Calibre (ebook manager)", binary = true, prerequisites = "wget",
     execute = "sudo -v && wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sudo sh /dev/stdin",
   },
   gimp = { description = "GIMP (image editor)", flatpak = "flathub org.gimp.GIMP", unprivileged = true, },

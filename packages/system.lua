@@ -9,22 +9,25 @@ return {
       sudo apt-get autoremove -y
       sudo apt-get autoclean
       sudo apt-get clean
-      flatpak update
+      which -s flatpak && flatpak update
       which -s brew && brew autoremove
       which -s brew && brew cleanup --prune=all
       which -s docker && sudo docker system prune --all -f   # sudo because we assume the user hasn't started a new session after being added to docker group
     ]],
     ignore = true,
   },
+  curl = { ask = false, apt = "curl", binary = true, priority = 99999, },
+  wget = { ask = false, apt = "wget", binary = true, priority = 99999, },
+  unzip = { ask = false, apt = "unzip", binary = true, priority = 99999, },
   brew = {
     description = "Brew (user-space package manager, originally for macOS)", binary = true,
-    prerequisites = "git",
+    prerequisites = { "git", "curl", },
     execute = [[
       /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
       echo >> ~/.bashrc
       echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.bashrc
       eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-      sudo apt-get install build-essential -y
+      sudo apt-get install build-essential -y   # why does this need to be separate from the earlier apt install?
       brew install gcc
     ]],
     priority = 150,
@@ -53,7 +56,7 @@ return {
   luarocks = {
     description = "Luarocks (Lua package manager)", binary = true,
     execute = [[
-      sudo apt-get install lua5.1 -y
+      sudo apt-get install lua5.1 -y     # separate steps to make sure luarocks chooses the correct version of Lua to depend on
       sudo apt-get install luarocks -y
     ]],
     priority = -1,
@@ -92,7 +95,7 @@ return {
   },
   ["docker-nvidia"] = {
     description = "Docker NVIDIA support",
-    prerequisites = "docker", hardware = "NVIDIA",
+    prerequisites = { "docker", "curl", }, hardware = "NVIDIA",
     execute = [[
       curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
         && curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
