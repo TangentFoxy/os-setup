@@ -2,8 +2,7 @@
 Scripts to make setting up a new system easier.. hopefully.
 
 **Note: Please take a look at the issues before running.**  
-Most things are working fine, and I am working hard to fix the remaining
-problems, but please take a look at what could go wrong before you run this.
+Most things are working fine, but please take a look at what could go wrong before you run this.
 
 More documentation coming soon!
 
